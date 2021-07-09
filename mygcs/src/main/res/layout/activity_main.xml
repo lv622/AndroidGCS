@@ -6,11 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button"
-        tools:layout_editor_absoluteX="127dp"
-        tools:layout_editor_absoluteY="306dp" />
+    <fragment
+        android:id="@+id/map"
+        app:navermap_latitude="35.946246"
+        app:navermap_longitude="126.682209"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.naver.maps.map.MapFragment" />
+
 </android.support.constraint.ConstraintLayout>

@@ -41,10 +41,10 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
 
-    // 네이버 지도 SDK
-    implementation 'com.naver.maps:map-sdk:3.4.0'
-
     // Drone API
     implementation project(':ClientLib')
     compile project(path: ':Mavlink')
+
+    // 네이버 지도 SDK
+    implementation 'com.naver.maps:map-sdk:3.12.0'
 }
