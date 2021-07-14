@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
     @Override
     public void onTowerConnected() {
-        alertUser("DroneKit-Android Connected");
+        alertUser("DroneKit-Android Start");
         this.controlTower.registerDrone(this.drone, this.handler);
         this.drone.registerDroneListener(this);
     }
@@ -313,7 +313,6 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
             this.drone.connect(connectionParams);
         }
-
     }
 
     public void onFlightModeSelected(View view) {
