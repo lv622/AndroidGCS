@@ -6,15 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
     <fragment
         android:id="@+id/map"
-        app:navermap_latitude="35.946246"
-        app:navermap_longitude="126.682209"
+        android:name="com.naver.maps.map.MapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.naver.maps.map.MapFragment" />
-
-
+        app:navermap_latitude="35.946246"
+        app:navermap_longitude="126.682209"
+        tools:layout_editor_absoluteX="-134dp"
+        tools:layout_editor_absoluteY="16dp" />
 
     <TableRow
         android:id="@+id/vehicleTableRow"
@@ -58,6 +59,17 @@
             android:text="비행모드 "
             android:textColor="#ffffff"
             android:textAppearance="?android:attr/textAppearanceMedium" />
+
+<!--        <Spinner-->
+<!--            android:id="@+id/modeSelect"-->
+<!--            android:layout_width="100dp"-->
+<!--            android:layout_height="fill_parent"-->
+<!--            android:layout_column="1"-->
+<!--            android:layout_gravity="left"-->
+<!--            android:paddingBottom="5dp"-->
+<!--            android:paddingTop="5dp"-->
+<!--            android:textColor="#ffffff"-->
+<!--            android:textAppearance="?android:attr/textAppearanceMedium" />-->
 
         <TextView
             android:id="@+id/vehicleModeValueTextView"
@@ -165,7 +177,7 @@
     </TableRow>
 
     <TableRow
-        android:id="@+id/buttenTableRow"
+        android:id="@+id/armTableRow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@+id/map"
@@ -179,6 +191,7 @@
             android:id="@+id/btnArmTakeOff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="invisible"
             android:text="ARM" />
     </TableRow>
 
@@ -194,5 +207,36 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.99" />
 
+    <TableLayout
+        android:id="@+id/AltitudeTableLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.927"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.162">
+
+        <Button
+            android:id="@+id/btnAltitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5.5m" />
+
+        <Button
+            android:id="@+id/btnAltitudePlus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:text="+0.5" />
+
+        <Button
+            android:id="@+id/btnAltitudeMinus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:text="-0.5" />
+    </TableLayout>
 
 </android.support.constraint.ConstraintLayout>
