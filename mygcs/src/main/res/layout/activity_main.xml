@@ -191,6 +191,7 @@
             android:id="@+id/btnArmTakeOff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="onArmButtonTap"
             android:visibility="invisible"
             android:text="ARM" />
     </TableRow>
@@ -222,17 +223,18 @@
             android:id="@+id/btnAltitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="5.5m" />
+            android:onClick="onAltitudeButtonTap"
+            android:text="5.5m\n이륙고도" />
 
         <Button
-            android:id="@+id/btnAltitudePlus"
+            android:id="@+id/btnAltitudeUp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="invisible"
             android:text="+0.5" />
 
         <Button
-            android:id="@+id/btnAltitudeMinus"
+            android:id="@+id/btnAltitudeDown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="invisible"

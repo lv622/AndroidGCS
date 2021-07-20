@@ -1,12 +1,14 @@
 package com.viasofts.mygcs;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -77,13 +79,16 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     private static final int DEFAULT_UDP_PORT = 14550;
     private static final int DEFAULT_USB_BAUD_RATE = 57600;
 
-    private NaverMap naverMap;
+    private NaverMap mNaverMap;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
     private FusedLocationSource locationSource;
 
     private Marker droneGpsMarker = new Marker();
     //private Spinner modeSelector;
+
+    private double setAltitude = 5.5;
+    private String textAltitude = "";
 
     Handler mainHandler;
 
@@ -108,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
     @Override
     public void onMapReady(@NonNull NaverMap naverMap) {
+        this.mNaverMap = naverMap;
         naverMap.setMapType(NaverMap.MapType.Hybrid);
 
         //줌버튼 비활성화
@@ -128,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         if (locationSource.onRequestPermissionsResult(
                 requestCode, permissions, grantResults)) {
             if (!locationSource.isActivated()) { // 권한 거부됨
-                naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
+                mNaverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
             }
             return;
         }
@@ -145,24 +151,6 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         }
         mapFragment.getMapAsync(this);
     }
-
-    //드론 모드 스피너
-    /*
-    public void setModeSpinner(){
-        this.modeSelector = (Spinner) findViewById(R.id.modeSelect);
-        this.modeSelector.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                onFlightModeSelected(view);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Do nothing
-            }
-        });
-    }
-     */
 
     @Override
     public void onStart() {
@@ -188,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             case AttributeEvent.STATE_CONNECTED:
                 alertUser("Drone Connected");
                 updateArmButton();
-                //checkSoloState();
+                checkSoloState();
                 break;
 
             case AttributeEvent.STATE_DISCONNECTED:
@@ -261,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         });
     }
 
-    //모터 가동, 이륙, 자동 착륙 버튼 and UI
+    //모터 가동, 이륙, 자동 착륙 버튼 UI
     protected void updateArmButton() {
         State vehicleState = this.drone.getAttribute(AttributeType.STATE);
         Button armButton = (Button) findViewById(R.id.btnArmTakeOff);
@@ -273,8 +261,23 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         }
 
         if (vehicleState.isFlying()) {
-            // Land //착륙
+            // Land
             armButton.setText("LAND");
+        } else if (vehicleState.isArmed()) {
+            // Take off
+            armButton.setText("TAKE OFF");
+        } else if (vehicleState.isConnected()) {
+            // Connected but not Armed
+            armButton.setText("ARM");
+        }
+    }
+
+    //모터 가동, 이륙, 자동 착륙 버튼
+    public void onArmButtonTap(View view) {
+        State vehicleState = this.drone.getAttribute(AttributeType.STATE);
+
+        if (vehicleState.isFlying()) {
+            // Land
             VehicleApi.getApi(this.drone).setVehicleMode(VehicleMode.COPTER_LAND, new SimpleCommandListener() {
                 @Override
                 public void onError(int executionError) {
@@ -287,8 +290,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
                 }
             });
         } else if (vehicleState.isArmed()) {
-            // Take off //이륙
-            armButton.setText("TAKE OFF");
+            // Take off
             ControlApi.getApi(this.drone).takeoff(10, new AbstractCommandListener() {
 
                 @Override
@@ -310,8 +312,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             // Connect
             alertUser("Connect to a drone first");
         } else {
-            // Connected but not Armed //모터 가동 상태
-            armButton.setText("ARM");
+            // Connected but not Armed
             VehicleApi.getApi(this.drone).arm(true, false, new SimpleCommandListener() {
                 @Override
                 public void onError(int executionError) {
@@ -326,63 +327,101 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         }
     }
 
-    //이륙 고도 버튼
+    //이륙고도 버튼 UI
     protected void updateAltitudeButton() {
-        Button btnAltitude = (Button) findViewById(R.id.btnAltitude);
-        final Button btnAltiPlus = (Button) findViewById(R.id.btnAltitudePlus);
-        final Button btnAltiminus = (Button) findViewById(R.id.btnAltitudeMinus);
+        //State vehicleState = this.drone.getAttribute(AttributeType.STATE);
 
-        final TextView altitudeTextView = (TextView) findViewById(R.id.altitudeValueTextView);
-        final Altitude droneAltitude = this.drone.getAttribute(AttributeType.ALTITUDE);
+        final Button btnAltitude = (Button) findViewById(R.id.btnAltitude);
+        final Button btnAltiUp = (Button) findViewById(R.id.btnAltitudeUp);
+        final Button btnAltiDown = (Button) findViewById(R.id.btnAltitudeDown);
 
-        if (!this.drone.isConnected()) {
-            btnAltiPlus.setVisibility(View.INVISIBLE);
-            btnAltiminus.setVisibility(View.INVISIBLE);
-        } else {
-            btnAltitude.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    droneAltitude.setAltitude(5.5);
-                    altitudeTextView.setText(String.format("%3.1f", droneAltitude.getAltitude()) + "m");
-
-                    btnAltiPlus.setVisibility(View.VISIBLE);
-                    btnAltiminus.setVisibility(View.VISIBLE);
+        btnAltitude.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (btnAltiUp.getVisibility() == v.INVISIBLE) {
+                    btnAltiUp.setVisibility(View.VISIBLE);
+                    btnAltiDown.setVisibility(View.VISIBLE);
+                } else {
+                    btnAltiUp.setVisibility(View.INVISIBLE);
+                    btnAltiDown.setVisibility(View.INVISIBLE);
                 }
-            });
-        }
+            }
+        });
+    }
 
-        btnAltiPlus.setOnClickListener(new View.OnClickListener() {
+    ////////////////이륙 고도 버튼
+    protected void onAltitudeButtonTap(View view) {
+        final Button btnAltitude = (Button) findViewById(R.id.btnAltitude);
+        Button altitudeUp = (Button) findViewById(R.id.btnAltitudeUp);
+        Button altitudeDown = (Button) findViewById(R.id.btnAltitudeDown);
+
+        textAltitude = setAltitude + "M\n이륙고도";
+        btnAltitude.setText(textAltitude);
+
+        //final Altitude droneAltitude = this.drone.getAttribute(AttributeType.ALTITUDE);
+
+        btnAltitude.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                droneAltitude.setAltitude(droneAltitude.getTargetAltitude() + 0.5);
-                altitudeTextView.setText(String.format("%3.1f", droneAltitude.getAltitude()) + "m");
+                textAltitude = setAltitude + "M\n이륙고도";
+                btnAltitude.setText(textAltitude);
+
+                //Log.d("mylog_alti", "이륙고도 설정: " + droneAltitude.getAltitude());
+                Log.d("test_set", "onClick: " + setAltitude);
             }
         });
 
-        btnAltiminus.setOnClickListener(new View.OnClickListener() {
+        altitudeUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                droneAltitude.setAltitude(droneAltitude.getTargetAltitude() - 0.5);
-                altitudeTextView.setText(String.format("%3.1f", droneAltitude.getAltitude()) + "m");
+                if (setAltitude < 10) {
+                    setAltitude += 0.5;
+                    textAltitude = setAltitude + "M\n이륙고도";
+                    btnAltitude.setText(textAltitude);
+                }
+                //droneAltitude.setAltitude(droneAltitude.getTargetAltitude() + setAltitude);
+
+                //Log.d("mylog_alti", "이륙고도 Up: " + droneAltitude.getAltitude());
+                Log.d("test_set", "onClick: " + setAltitude);
+                //altitudeTextView.setText(String.format("%3.1f", droneAltitude.getAltitude()) + "m");
             }
         });
 
+        altitudeDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (setAltitude > 3) {
+                    setAltitude -= 0.5;
+                    textAltitude = setAltitude + "M\n이륙고도";
+                    btnAltitude.setText(textAltitude);
+                }
+                //droneAltitude.setAltitude(droneAltitude.getTargetAltitude() - setAltitude);
+
+                //Log.d("mylog_alti", "이륙고도 Down: " + droneAltitude.getAltitude());
+                Log.d("test_set", "onClick: " + setAltitude);
+                //altitudeTextView.setText(String.format("%3.1f", droneAltitude.getAltitude()) + "m");
+            }
+        });
     }
 
     //드론 gps
     protected void updateGpsPosition() {
-        //Altitude droneAltitude = this.drone.getAttribute(AttributeType.ALTITUDE);
-        ////double vehicleAltitude = droneAltitude.getAltitude();
+        Attitude attitude = this.drone.getAttribute(AttributeType.ATTITUDE);
         Gps droneGps = this.drone.getAttribute(AttributeType.GPS);
         LatLong droneGpsPosition = droneGps.getPosition();
+        double droneYaw = 0;
 
-        //double setDroneGps = 0;
+        if (attitude.getYaw() < 0) {
+            droneYaw = 360 + attitude.getYaw();
+        } else {
+            droneYaw = attitude.getYaw();
+        }
 
-//        droneGpsMarker.setPosition(new LatLng(droneGpsPosition.getLatitude(), droneGpsPosition.getLongitude()));
-//        droneGpsMarker.setWidth(100);
-//        droneGpsMarker.setHeight(100);
-//        droneGpsMarker.setIcon(OverlayImage.fromResource(R.drawable.dmaker));
-//        droneGpsMarker.setMap(naverMap);
+        droneGpsMarker.setPosition(new LatLng(droneGpsPosition.getLatitude(), droneGpsPosition.getLongitude()));
+        droneGpsMarker.setWidth(100);
+        droneGpsMarker.setHeight(100);
+        droneGpsMarker.setIcon(OverlayImage.fromResource(R.drawable.dmaker));
+        droneGpsMarker.setMap(mNaverMap);
 
         Log.d("mylog", "위도: " + droneGpsPosition.getLatitude() + ", 경도: " + droneGpsPosition.getLongitude());
     }
@@ -409,44 +448,6 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             vehicleModeTextView.setText("UNKNOWN");
         }
     }
-
-    /*
-    protected void updateVehicleModesForType(int droneType) {
-
-        List<VehicleMode> vehicleModes = VehicleMode.getVehicleModePerDroneType(droneType);
-        ArrayAdapter<VehicleMode> vehicleModeArrayAdapter = new ArrayAdapter<VehicleMode>(this, android.R.layout.simple_spinner_item, vehicleModes);
-        vehicleModeArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        this.modeSelector.setAdapter(vehicleModeArrayAdapter);
-    }
-
-    protected void updateVehicleMode() {
-        State vehicleState = this.drone.getAttribute(AttributeType.STATE);
-        VehicleMode vehicleMode = vehicleState.getVehicleMode();
-        ArrayAdapter arrayAdapter = (ArrayAdapter) this.modeSelector.getAdapter();
-        this.modeSelector.setSelection(arrayAdapter.getPosition(vehicleMode));
-    }
-
-    public void onFlightModeSelected(View view) {
-        VehicleMode vehicleMode = (VehicleMode) this.modeSelector.getSelectedItem();
-
-        VehicleApi.getApi(this.drone).setVehicleMode(vehicleMode, new AbstractCommandListener() {
-            @Override
-            public void onSuccess() {
-                alertUser("Vehicle mode change successful.");
-            }
-
-            @Override
-            public void onError(int executionError) {
-                alertUser("Vehicle mode change failed: " + executionError);
-            }
-
-            @Override
-            public void onTimeout() {
-                alertUser("Vehicle mode change timed out.");
-            }
-        });
-    }
-    */
 
     protected void updateAltitude() {
         TextView altitudeTextView = (TextView) findViewById(R.id.altitudeValueTextView);
@@ -522,3 +523,57 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         mainHandler.post(runnable);
     }
 }
+
+
+    /* // 드론 모드 스피너
+    public void setModeSpinner(){
+        this.modeSelector = (Spinner) findViewById(R.id.modeSelect);
+        this.modeSelector.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                onFlightModeSelected(view);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+    }
+
+    protected void updateVehicleModesForType(int droneType) {
+
+        List<VehicleMode> vehicleModes = VehicleMode.getVehicleModePerDroneType(droneType);
+        ArrayAdapter<VehicleMode> vehicleModeArrayAdapter = new ArrayAdapter<VehicleMode>(this, android.R.layout.simple_spinner_item, vehicleModes);
+        vehicleModeArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        this.modeSelector.setAdapter(vehicleModeArrayAdapter);
+    }
+
+    protected void updateVehicleMode() {
+        State vehicleState = this.drone.getAttribute(AttributeType.STATE);
+        VehicleMode vehicleMode = vehicleState.getVehicleMode();
+        ArrayAdapter arrayAdapter = (ArrayAdapter) this.modeSelector.getAdapter();
+        this.modeSelector.setSelection(arrayAdapter.getPosition(vehicleMode));
+    }
+
+    public void onFlightModeSelected(View view) {
+        VehicleMode vehicleMode = (VehicleMode) this.modeSelector.getSelectedItem();
+
+        VehicleApi.getApi(this.drone).setVehicleMode(vehicleMode, new AbstractCommandListener() {
+            @Override
+            public void onSuccess() {
+                alertUser("Vehicle mode change successful.");
+            }
+
+            @Override
+            public void onError(int executionError) {
+                alertUser("Vehicle mode change failed: " + executionError);
+            }
+
+            @Override
+            public void onTimeout() {
+                alertUser("Vehicle mode change timed out.");
+            }
+        });
+    }
+    */
