@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         setNaverMap(); //네이버맵
         onBtnConnectTap(); //기체 연결 버튼
         updateAltitudeButton(); //이륙고도 버튼
-
+        updateMapTypeButton(); //지도 유형 버튼
     }
 
     @Override
@@ -231,26 +231,26 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         }
     }
 
-    // 기체 연결 버튼 and UI
+    // 기체 연결 버튼 UI
     public void onBtnConnectTap() {
-        final Button connectButton = (Button) findViewById(R.id.btnConnect);
+        final Button btnConnect = (Button) findViewById(R.id.btnConnect);
 
-        connectButton.setOnClickListener(new View.OnClickListener() {
+        btnConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (drone.isConnected()) {
                     drone.disconnect();
-                    connectButton.setText("Disconnect");
+                    btnConnect.setText("Disconnect");
                 } else {
                     ConnectionParameter connectionParams = ConnectionParameter.newUdpConnection(null);
                     drone.connect(connectionParams);
-                    connectButton.setText("Connect");
+                    btnConnect.setText("Connect");
                 }
             }
         });
     }
 
-    //모터 가동, 이륙, 자동 착륙 버튼 UI
+    //Arm 버튼 UI
     protected void updateArmButton() {
         State vehicleState = this.drone.getAttribute(AttributeType.STATE);
         Button armButton = (Button) findViewById(R.id.btnArmTakeOff);
@@ -273,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         }
     }
 
-    //모터 가동, 이륙, 자동 착륙 버튼
+    //Arm 버튼
     public void onArmButtonTap(View view) {
         State vehicleState = this.drone.getAttribute(AttributeType.STATE);
 
@@ -302,10 +302,8 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         }
     }
 
-    //이륙고도 버튼 UI
+    //이륙고도 UI
     protected void updateAltitudeButton() {
-        //State vehicleState = this.drone.getAttribute(AttributeType.STATE);
-
         final Button btnAltitude = (Button) findViewById(R.id.btnAltitude);
         final Button btnAltiUp = (Button) findViewById(R.id.btnAltitudeUp);
         final Button btnAltiDown = (Button) findViewById(R.id.btnAltitudeDown);
@@ -324,8 +322,8 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         });
     }
 
-    ////////////////이륙 고도 버튼
-    protected void onAltitudeButtonTap(View view) {
+    //이륙 고도 버튼
+    public void onAltitudeButtonTap(View view) {
         final Button btnAltitude = (Button) findViewById(R.id.btnAltitude);
         Button altitudeUp = (Button) findViewById(R.id.btnAltitudeUp);
         Button altitudeDown = (Button) findViewById(R.id.btnAltitudeDown);
@@ -375,6 +373,65 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
                 //Log.d("mylog_alti", "이륙고도 Down: " + droneAltitude.getAltitude());
                 Log.d("test_set", "onClick: " + setAltitude);
                 //altitudeTextView.setText(String.format("%3.1f", droneAltitude.getAltitude()) + "m");
+            }
+        });
+    }
+
+    //지도 유형 버튼 UI
+    protected void updateMapTypeButton() {
+        final Button btnMapStatic = (Button) findViewById(R.id.btnMapStatic);
+        final Button btnMapHybrid = (Button) findViewById(R.id.btnMapHybrid);
+        final Button btnMapTerrain = (Button) findViewById(R.id.btnMapTerrain);
+        final Button btnMapBasic = (Button) findViewById(R.id.btnMapBasic);
+
+        btnMapStatic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (btnMapHybrid.getVisibility() == v.INVISIBLE) {
+                    btnMapHybrid.setVisibility(View.VISIBLE);
+                    btnMapTerrain.setVisibility(View.VISIBLE);
+                    btnMapBasic.setVisibility(View.VISIBLE);
+                } else {
+                    btnMapHybrid.setVisibility(View.INVISIBLE);
+                    btnMapTerrain.setVisibility(View.INVISIBLE);
+                    btnMapBasic.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+    }
+
+    //지도 유형 버튼
+    public void onMapTypeButtonTap(View view) {
+        final Button btnMapStatic = (Button) findViewById(R.id.btnMapStatic);
+        Button btnMapHybrid = (Button) findViewById(R.id.btnMapHybrid);
+        Button btnMapTerrain = (Button) findViewById(R.id.btnMapTerrain);
+        Button btnMapBasic = (Button) findViewById(R.id.btnMapBasic);
+
+        Log.d("maptype", "start");
+
+        btnMapHybrid.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mNaverMap.setMapType(NaverMap.MapType.Hybrid);
+                btnMapStatic.setText("위성지도");
+
+                Log.d("maptype", "set hybrid");
+            }
+        });
+
+        btnMapTerrain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mNaverMap.setMapType(NaverMap.MapType.Terrain);
+                btnMapStatic.setText("지형도");
+            }
+        });
+
+        btnMapBasic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mNaverMap.setMapType(NaverMap.MapType.Basic);
+                btnMapStatic.setText("일반지도");
             }
         });
     }

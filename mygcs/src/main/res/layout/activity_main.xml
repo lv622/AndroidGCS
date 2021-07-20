@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
     <fragment
         android:id="@+id/map"
         android:name="com.naver.maps.map.MapFragment"
@@ -230,6 +229,7 @@
             android:id="@+id/btnAltitudeUp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="onAltitudeButtonTap"
             android:visibility="invisible"
             android:text="+0.5" />
 
@@ -237,8 +237,53 @@
             android:id="@+id/btnAltitudeDown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="onAltitudeButtonTap"
             android:visibility="invisible"
             android:text="-0.5" />
     </TableLayout>
+
+    <TableLayout
+        android:id="@+id/mapTypeTableLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.77"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.99">
+
+        <Button
+            android:id="@+id/btnMapHybrid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onMapTypeButtonTap"
+            android:visibility="invisible"
+            android:text="위성지도" />
+
+        <Button
+            android:id="@+id/btnMapTerrain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onMapTypeButtonTap"
+            android:visibility="invisible"
+            android:text="지형도" />
+
+        <Button
+            android:id="@+id/btnMapBasic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onMapTypeButtonTap"
+            android:visibility="invisible"
+            android:text="일반지도" />
+
+        <Button
+            android:id="@+id/btnMapStatic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onMapTypeButtonTap"
+            android:text="일반지도" />
+    </TableLayout>
+
 
 </android.support.constraint.ConstraintLayout>
