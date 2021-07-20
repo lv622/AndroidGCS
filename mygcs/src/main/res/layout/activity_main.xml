@@ -191,6 +191,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onArmButtonTap"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/onbutton"
             android:visibility="invisible"
             android:text="ARM" />
     </TableRow>
@@ -200,6 +202,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Connect"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/onbutton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/map"
         app:layout_constraintHorizontal_bias="0.99"
@@ -209,7 +213,7 @@
 
     <TableLayout
         android:id="@+id/AltitudeTableLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="30pt"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -221,23 +225,32 @@
         <Button
             android:id="@+id/btnAltitude"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onAltitudeButtonTap"
+            android:layout_height="50dp"
+            android:layout_margin="1dp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/offbutton"
+            android:textSize="6pt"
             android:text="5.5m\n이륙고도" />
 
         <Button
             android:id="@+id/btnAltitudeUp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onAltitudeButtonTap"
+            android:layout_height="50dp"
+            android:layout_margin="1dp"
+            android:textSize="7pt"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/ebutton"
             android:visibility="invisible"
             android:text="+0.5" />
 
         <Button
             android:id="@+id/btnAltitudeDown"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onAltitudeButtonTap"
+            android:layout_height="50dp"
+            android:layout_margin="1dp"
+            android:textSize="7pt"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/ebutton"
             android:visibility="invisible"
             android:text="-0.5" />
     </TableLayout>
@@ -254,10 +267,12 @@
         app:layout_constraintVertical_bias="0.99">
 
         <Button
-            android:id="@+id/btnMapHybrid"
+            android:id="@+id/btnMapSatellite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onMapTypeButtonTap"
+            android:layout_margin="1dp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/offbutton"
             android:visibility="invisible"
             android:text="위성지도" />
 
@@ -265,7 +280,9 @@
             android:id="@+id/btnMapTerrain"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onMapTypeButtonTap"
+            android:layout_margin="1dp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/offbutton"
             android:visibility="invisible"
             android:text="지형도" />
 
@@ -273,7 +290,9 @@
             android:id="@+id/btnMapBasic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onMapTypeButtonTap"
+            android:layout_margin="1dp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/offbutton"
             android:visibility="invisible"
             android:text="일반지도" />
 
@@ -281,7 +300,9 @@
             android:id="@+id/btnMapStatic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onMapTypeButtonTap"
+            android:layout_margin="1dp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/onbutton"
             android:text="일반지도" />
     </TableLayout>
 
