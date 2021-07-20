@@ -234,6 +234,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     // 기체 연결 버튼 and UI
     public void onBtnConnectTap() {
         final Button connectButton = (Button) findViewById(R.id.btnConnect);
+
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -291,39 +292,13 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             });
         } else if (vehicleState.isArmed()) {
             // Take off
-            ControlApi.getApi(this.drone).takeoff(10, new AbstractCommandListener() {
-
-                @Override
-                public void onSuccess() {
-                    alertUser("Taking off...");
-                }
-
-                @Override
-                public void onError(int i) {
-                    alertUser("Unable to take off.");
-                }
-
-                @Override
-                public void onTimeout() {
-                    alertUser("Unable to take off.");
-                }
-            });
+            OnTakeOffClickHandler();
         } else if (!vehicleState.isConnected()) {
             // Connect
             alertUser("Connect to a drone first");
         } else {
             // Connected but not Armed
-            VehicleApi.getApi(this.drone).arm(true, false, new SimpleCommandListener() {
-                @Override
-                public void onError(int executionError) {
-                    alertUser("Unable to arm vehicle.");
-                }
-
-                @Override
-                public void onTimeout() {
-                    alertUser("Arming operation timed out.");
-                }
-            });
+            OnArmClickHandler();
         }
     }
 
@@ -486,6 +461,76 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         } else {
             alertUser("Solo state is up to date.");
         }
+    }
+
+    public void OnArmClickHandler() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setMessage("모터를 가동합니다.\n모터가 고속으로 회전합니다.");
+        builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                VehicleApi.getApi(drone).arm(true, false, new SimpleCommandListener() {
+                    @Override
+                    public void onError(int executionError) {
+                        alertUser("Unable to arm vehicle.");
+                    }
+
+                    @Override
+                    public void onTimeout() {
+                        alertUser("Arming operation timed out.");
+                    }
+                });
+            }
+        });
+
+        builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                Toast.makeText(getApplicationContext(), "Cancel Click", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    public void OnTakeOffClickHandler() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setMessage("지정한 이륙고도까지 기체가 상승합니다.\n안전거리를 유지하세요.");
+        builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                ControlApi.getApi(drone).takeoff(10, new AbstractCommandListener() {
+
+                    @Override
+                    public void onSuccess() {
+                        alertUser("Taking off...");
+                    }
+
+                    @Override
+                    public void onError(int i) {
+                        alertUser("Unable to take off.");
+                    }
+
+                    @Override
+                    public void onTimeout() {
+                        alertUser("Unable to take off.");
+                    }
+                });
+            }
+        });
+
+        builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                Toast.makeText(getApplicationContext(), "Cancel Click", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
 
