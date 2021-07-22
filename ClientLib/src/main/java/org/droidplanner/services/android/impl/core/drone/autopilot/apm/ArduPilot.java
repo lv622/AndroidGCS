@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.MAVLink.common.msg_global_position_int;
 import com.MAVLink.Messages.MAVLinkMessage;
 import com.MAVLink.ardupilotmega.msg_camera_feedback;
 import com.MAVLink.ardupilotmega.msg_mag_cal_progress;
@@ -125,6 +126,12 @@ public abstract class ArduPilot extends GenericMavLinkDrone {
 
             notifyDroneEvent(DroneInterfaces.DroneEventsType.SPEED);
         }
+    }
+
+    // 상대고도값 추가
+    protected void setAltitudeAbsoluteAndRelative(double absoluteAlt, double relativeAlt) {
+        this.altitude.setAltitudeAbsoluteAndRelative(absoluteAlt, relativeAlt);
+        notifyDroneEvent(DroneInterfaces.DroneEventsType.ALTITUDE);
     }
 
     @Override
@@ -457,6 +464,13 @@ public abstract class ArduPilot extends GenericMavLinkDrone {
                     getMagnetometerCalibration().processCalibrationMessage(message);
                     break;
 
+                // 상대고도값 추가
+                case msg_global_position_int.MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
+                    msg_global_position_int alt = (msg_global_position_int)message;
+                    if(alt != null) {
+                        setAltitudeAbsoluteAndRelative((double) alt.alt/1000, (double)alt.relative_alt / 1000);
+                    }
+                    break;
                 default:
                     break;
             }

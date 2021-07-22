@@ -28,13 +28,13 @@
             android:id="@+id/batteryLabelTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left"
             android:layout_column="0"
+            android:layout_gravity="left"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:text=" 전압 "
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
         <TextView
             android:id="@+id/batteryValueTextView"
@@ -42,11 +42,11 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:layout_gravity="left"
-            android:paddingBottom="5dp"
             android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:text="0V"
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
         <TextView
             android:id="@+id/vehicleModeLabelTextView"
@@ -56,31 +56,19 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:text="비행모드 "
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
-<!--        <Spinner-->
-<!--            android:id="@+id/modeSelect"-->
-<!--            android:layout_width="100dp"-->
-<!--            android:layout_height="fill_parent"-->
-<!--            android:layout_column="1"-->
-<!--            android:layout_gravity="left"-->
-<!--            android:paddingBottom="5dp"-->
-<!--            android:paddingTop="5dp"-->
-<!--            android:textColor="#ffffff"-->
-<!--            android:textAppearance="?android:attr/textAppearanceMedium" />-->
-
-        <TextView
-            android:id="@+id/vehicleModeValueTextView"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
+        <Spinner
+            android:id="@+id/modeSelect"
+            android:layout_width="125dp"
+            android:layout_height="fill_parent"
             android:layout_column="1"
             android:layout_gravity="left"
-            android:paddingBottom="5dp"
             android:paddingTop="5dp"
-            android:text="LOITER"
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:paddingBottom="5dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
         <TextView
             android:id="@+id/altitudeLabelTextView"
@@ -90,8 +78,8 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:text="고도 "
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
         <TextView
             android:id="@+id/altitudeValueTextView"
@@ -99,11 +87,11 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:layout_gravity="center"
-            android:paddingBottom="5dp"
             android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:text="0m"
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
         <TextView
             android:id="@+id/speedLabelTextView"
@@ -113,8 +101,8 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:text="속도 "
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
         <TextView
             android:id="@+id/speedValueTextView"
@@ -122,11 +110,11 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:layout_gravity="center"
-            android:paddingBottom="5dp"
             android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:text="0m/s"
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
         <TextView
             android:id="@+id/yawLabelTextView"
@@ -136,8 +124,8 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:text="YAW "
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
         <TextView
             android:id="@+id/yawValueTextView"
@@ -145,11 +133,11 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:layout_gravity="center"
-            android:paddingBottom="5dp"
             android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:text="0deg"
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
         <TextView
             android:id="@+id/gpsCountLabelTextView"
@@ -159,8 +147,8 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:text="위성 "
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
 
         <TextView
             android:id="@+id/gpsCountValueTextView"
@@ -168,11 +156,11 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:layout_gravity="center"
-            android:paddingBottom="5dp"
             android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:text="0"
-            android:textColor="#ffffff"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff" />
     </TableRow>
 
     <TableRow
@@ -190,20 +178,20 @@
             android:id="@+id/btnArmTakeOff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onArmButtonTap"
-            android:textColor="#FFFFFF"
             android:background="@drawable/onbutton"
-            android:visibility="invisible"
-            android:text="ARM" />
+            android:onClick="onArmButtonTap"
+            android:text="ARM"
+            android:textColor="#FFFFFF"
+            android:visibility="invisible" />
     </TableRow>
 
     <Button
         android:id="@+id/btnConnect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/onbutton"
         android:text="Connect"
         android:textColor="#FFFFFF"
-        android:background="@drawable/onbutton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/map"
         app:layout_constraintHorizontal_bias="0.99"
@@ -213,7 +201,7 @@
 
     <TableLayout
         android:id="@+id/AltitudeTableLayout"
-        android:layout_width="30pt"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -227,83 +215,111 @@
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_margin="1dp"
-            android:textColor="#FFFFFF"
             android:background="@drawable/offbutton"
-            android:textSize="6pt"
-            android:text="5.5m\n이륙고도" />
+            android:text="5.5m\n이륙고도"
+            android:textColor="#FFFFFF"
+            android:textSize="6pt" />
 
         <Button
             android:id="@+id/btnAltitudeUp"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_margin="1dp"
-            android:textSize="7pt"
-            android:textColor="#FFFFFF"
             android:background="@drawable/ebutton"
-            android:visibility="invisible"
-            android:text="+0.5" />
+            android:text="+0.5"
+            android:textColor="#FFFFFF"
+            android:textSize="7pt"
+            android:visibility="invisible" />
 
         <Button
             android:id="@+id/btnAltitudeDown"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_margin="1dp"
-            android:textSize="7pt"
-            android:textColor="#FFFFFF"
             android:background="@drawable/ebutton"
-            android:visibility="invisible"
-            android:text="-0.5" />
+            android:text="-0.5"
+            android:textColor="#FFFFFF"
+            android:textSize="7pt"
+            android:visibility="invisible" />
     </TableLayout>
 
     <TableLayout
-        android:id="@+id/mapTypeTableLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.77"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/map"
         app:layout_constraintVertical_bias="0.99">
 
-        <Button
-            android:id="@+id/btnMapSatellite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="1dp"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/offbutton"
-            android:visibility="invisible"
-            android:text="위성지도" />
 
-        <Button
-            android:id="@+id/btnMapTerrain"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="1dp"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/offbutton"
-            android:visibility="invisible"
-            android:text="지형도" />
+        <TableRow
+            android:layout_width="55dp"
+            android:layout_height="55dp">
 
-        <Button
-            android:id="@+id/btnMapBasic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="1dp"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/offbutton"
-            android:visibility="invisible"
-            android:text="일반지도" />
+            <TableLayout
+                android:id="@+id/mapTypeTableLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.70"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.99">
 
-        <Button
-            android:id="@+id/btnMapStatic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="1dp"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/onbutton"
-            android:text="일반지도" />
+                <Button
+                    android:id="@+id/btnMapSatellite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/offbutton"
+                    android:text="위성지도"
+                    android:textColor="#FFFFFF"
+                    android:visibility="invisible" />
+
+                <Button
+                    android:id="@+id/btnMapTerrain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/offbutton"
+                    android:text="지형도"
+                    android:textColor="#FFFFFF"
+                    android:visibility="invisible" />
+
+                <Button
+                    android:id="@+id/btnMapBasic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/offbutton"
+                    android:text="일반지도"
+                    android:textColor="#FFFFFF"
+                    android:visibility="invisible" />
+
+                <Button
+                    android:id="@+id/btnMapStatic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/onbutton"
+                    android:text="일반지도"
+                    android:textColor="#FFFFFF" />
+            </TableLayout>
+
+            <Button
+                android:id="@+id/btnCadastral"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="1dp"
+                android:background="@drawable/offbutton"
+                android:text="지적도off"
+                android:textColor="#FFFFFF" />
+        </TableRow>
+
     </TableLayout>
 
 
