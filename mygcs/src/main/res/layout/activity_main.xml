@@ -16,6 +16,7 @@
         tools:layout_editor_absoluteX="-134dp"
         tools:layout_editor_absoluteY="16dp" />
 
+
     <TableRow
         android:id="@+id/vehicleTableRow"
         android:layout_width="fill_parent"
@@ -185,23 +186,9 @@
             android:visibility="invisible" />
     </TableRow>
 
-    <Button
-        android:id="@+id/btnConnect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/onbutton"
-        android:text="Connect"
-        android:textColor="#FFFFFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/map"
-        app:layout_constraintHorizontal_bias="0.99"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.99" />
-
     <TableLayout
-        android:id="@+id/AltitudeTableLayout"
-        android:layout_width="60dp"
+        android:id="@+id/MissionTableLayout"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -210,37 +197,50 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.162">
 
-        <Button
-            android:id="@+id/btnAltitude"
+        <TableRow
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_margin="1dp"
-            android:background="@drawable/offbutton"
-            android:text="5.5m\n이륙고도"
-            android:textColor="#FFFFFF"
-            android:textSize="6pt" />
+            android:layout_height="wrap_content"
+            tools:layout_editor_absoluteX="360dp"
+            tools:layout_editor_absoluteY="35dp">
 
-        <Button
-            android:id="@+id/btnAltitudeUp"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_margin="1dp"
-            android:background="@drawable/ebutton"
-            android:text="+0.5"
-            android:textColor="#FFFFFF"
-            android:textSize="7pt"
-            android:visibility="invisible" />
+            <TableLayout
+                android:id="@+id/AltitudeTableLayout"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/btnAltitudeDown"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_margin="1dp"
-            android:background="@drawable/ebutton"
-            android:text="-0.5"
-            android:textColor="#FFFFFF"
-            android:textSize="7pt"
-            android:visibility="invisible" />
+                <Button
+                    android:id="@+id/btnAltitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/offbutton"
+                    android:text="5.5m\n이륙고도"
+                    android:textColor="#FFFFFF"
+                    android:textSize="6pt" />
+
+                <Button
+                    android:id="@+id/btnAltitudeUp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/ebutton"
+                    android:text="+0.5"
+                    android:textColor="#FFFFFF"
+                    android:textSize="7pt"
+                    android:visibility="invisible" />
+
+                <Button
+                    android:id="@+id/btnAltitudeDown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/ebutton"
+                    android:text="-0.5"
+                    android:textColor="#FFFFFF"
+                    android:textSize="7pt"
+                    android:visibility="invisible" />
+            </TableLayout>
+        </TableRow>
     </TableLayout>
 
     <TableLayout
@@ -248,20 +248,62 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.77"
+        app:layout_constraintHorizontal_bias="0.99"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/map"
         app:layout_constraintVertical_bias="0.99">
 
-
         <TableRow
-            android:layout_width="55dp"
-            android:layout_height="55dp">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TableLayout
+                android:id="@+id/mapCameraTableLayout"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.70"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.99">
+
+                <Button
+                    android:id="@+id/btnCameraMove"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/offbutton"
+                    android:text="맵 이동"
+                    android:textColor="#FFFFFF"
+                    android:visibility="invisible" />
+
+                <Button
+                    android:id="@+id/btnCameraUnMove"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/offbutton"
+                    android:text="맵 잠금"
+                    android:textColor="#FFFFFF"
+                    android:visibility="invisible" />
+
+                <Button
+                    android:id="@+id/btnCameraStatic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/onbutton"
+                    android:text="맵 잠금"
+                    android:textColor="#FFFFFF" />
+            </TableLayout>
 
             <TableLayout
                 android:id="@+id/mapTypeTableLayout"
-                android:layout_width="wrap_content"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.70"
@@ -309,18 +351,75 @@
                     android:textColor="#FFFFFF" />
             </TableLayout>
 
-            <Button
-                android:id="@+id/btnCadastral"
-                android:layout_width="60dp"
+            <TableLayout
+                android:id="@+id/mapCadastralTableLayout"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginLeft="1dp"
-                android:background="@drawable/offbutton"
-                android:text="지적도off"
-                android:textColor="#FFFFFF" />
-        </TableRow>
+                android:layout_gravity="bottom">
 
+                <Button
+                    android:id="@+id/btnCadastral"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/offbutton"
+                    android:text="지적도\noff"
+                    android:textColor="#FFFFFF" />
+            </TableLayout>
+
+            <TableLayout
+                android:id="@+id/clearTableLayout"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom">
+
+                <Button
+                    android:id="@+id/btnClear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_margin="1dp"
+                    android:background="@drawable/ebutton"
+                    android:text="Clear"
+                    android:textColor="#FFFFFF" />
+            </TableLayout>
+
+            <TableLayout
+                android:id="@+id/cunnectTableLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom">
+
+                <Button
+                    android:id="@+id/btnConnect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="1dp"
+                    android:layout_marginLeft="30dp"
+                    android:background="@drawable/onbutton"
+                    android:text="Connect"
+                    android:textColor="#FFFFFF" />
+            </TableLayout>
+        </TableRow>
     </TableLayout>
 
+    <TableLayout
+        android:id="@+id/recyclerViewTableLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="95dp"
+        app:layout_constraintBottom_toBottomOf="@+id/map"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.11">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+    </TableLayout>
 
 </android.support.constraint.ConstraintLayout>
