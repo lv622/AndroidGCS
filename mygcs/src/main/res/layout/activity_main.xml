@@ -179,7 +179,7 @@
             android:id="@+id/btnArmTakeOff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/onbutton"
+            android:background="@drawable/btn_on"
             android:onClick="onArmButtonTap"
             android:text="ARM"
             android:textColor="#FFFFFF"
@@ -213,7 +213,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="50m\nAB거리"
                     android:textColor="#FFFFFF"
                     android:textSize="6pt" />
@@ -223,7 +223,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/ebutton"
+                    android:background="@drawable/btn_event"
                     android:text="+10"
                     android:textColor="#FFFFFF"
                     android:textSize="7pt"
@@ -234,7 +234,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/ebutton"
+                    android:background="@drawable/btn_event"
                     android:text="-10"
                     android:textColor="#FFFFFF"
                     android:textSize="7pt"
@@ -251,7 +251,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="5.5m\n비행폭"
                     android:textColor="#FFFFFF"
                     android:textSize="6pt" />
@@ -261,7 +261,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/ebutton"
+                    android:background="@drawable/btn_event"
                     android:text="+0.5"
                     android:textColor="#FFFFFF"
                     android:textSize="7pt"
@@ -272,7 +272,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/ebutton"
+                    android:background="@drawable/btn_event"
                     android:text="-0.5"
                     android:textColor="#FFFFFF"
                     android:textSize="7pt"
@@ -289,7 +289,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="5.5m\n이륙고도"
                     android:textColor="#FFFFFF"
                     android:textSize="6pt" />
@@ -299,7 +299,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/ebutton"
+                    android:background="@drawable/btn_event"
                     android:text="+0.5"
                     android:textColor="#FFFFFF"
                     android:textSize="7pt"
@@ -310,7 +310,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/ebutton"
+                    android:background="@drawable/btn_event"
                     android:text="-0.5"
                     android:textColor="#FFFFFF"
                     android:textSize="7pt"
@@ -327,7 +327,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="임무"
                     android:textColor="#FFFFFF"
                     android:textSize="6pt" />
@@ -337,7 +337,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="AB"
                     android:textColor="#FFFFFF"
                     android:textSize="7pt"
@@ -348,7 +348,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="다각형"
                     android:textColor="#FFFFFF"
                     android:textSize="7pt"
@@ -359,7 +359,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_margin="1dp"
-                    android:background="@drawable/ebutton"
+                    android:background="@drawable/btn_event"
                     android:text="취소"
                     android:textColor="#FFFFFF"
                     android:textSize="7pt"
@@ -393,8 +393,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="1dp"
-                    android:background="@drawable/offbutton"
-                    android:text="A지점 설정"
+                    android:background="@drawable/btn_off"
+                    android:text="임무 설정"
                     android:textColor="#FFFFFF"
                     android:visibility="invisible" />
             </TableLayout>
@@ -416,7 +416,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="맵 이동"
                     android:textColor="#FFFFFF"
                     android:visibility="invisible" />
@@ -426,7 +426,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="맵 잠금"
                     android:textColor="#FFFFFF"
                     android:visibility="invisible" />
@@ -436,7 +436,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:background="@drawable/onbutton"
+                    android:background="@drawable/btn_on"
                     android:text="맵 이동"
                     android:textColor="#FFFFFF" />
             </TableLayout>
@@ -458,7 +458,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="위성지도"
                     android:textColor="#FFFFFF"
                     android:visibility="invisible" />
@@ -468,7 +468,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="지형도"
                     android:textColor="#FFFFFF"
                     android:visibility="invisible" />
@@ -478,7 +478,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="일반지도"
                     android:textColor="#FFFFFF"
                     android:visibility="invisible" />
@@ -488,7 +488,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:background="@drawable/onbutton"
+                    android:background="@drawable/btn_on"
                     android:text="일반지도"
                     android:textColor="#FFFFFF" />
             </TableLayout>
@@ -505,7 +505,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:layout_margin="1dp"
-                    android:background="@drawable/offbutton"
+                    android:background="@drawable/btn_off"
                     android:text="지적도\noff"
                     android:textColor="#FFFFFF" />
             </TableLayout>
@@ -522,7 +522,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:layout_margin="1dp"
-                    android:background="@drawable/ebutton"
+                    android:background="@drawable/btn_event"
                     android:text="Clear"
                     android:textColor="#FFFFFF" />
             </TableLayout>
@@ -539,7 +539,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="1dp"
                     android:layout_marginLeft="30dp"
-                    android:background="@drawable/onbutton"
+                    android:background="@drawable/btn_on"
                     android:text="Connect"
                     android:textColor="#FFFFFF" />
             </TableLayout>
