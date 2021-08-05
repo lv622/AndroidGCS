@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PointF;
-import android.location.Location;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
@@ -13,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,10 +19,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.naver.maps.geometry.LatLng;
-import com.naver.maps.geometry.MathUtils;
 import com.naver.maps.map.CameraAnimation;
 import com.naver.maps.map.CameraUpdate;
 import com.naver.maps.map.LocationTrackingMode;
@@ -35,6 +31,7 @@ import com.naver.maps.map.UiSettings;
 import com.naver.maps.map.overlay.LocationOverlay;
 import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.overlay.OverlayImage;
+import com.naver.maps.map.overlay.PolygonOverlay;
 import com.naver.maps.map.overlay.PolylineOverlay;
 import com.naver.maps.map.util.FusedLocationSource;
 import com.o3dr.android.client.ControlTower;
@@ -61,10 +58,12 @@ import com.o3dr.services.android.lib.drone.property.VehicleMode;
 import com.o3dr.services.android.lib.gcs.link.LinkConnectionStatus;
 import com.o3dr.services.android.lib.model.AbstractCommandListener;
 import com.o3dr.services.android.lib.model.SimpleCommandListener;
+import com.o3dr.services.android.lib.util.MathUtils;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements DroneListener, TowerListener, LinkListener, OnMapReadyCallback {
@@ -93,10 +92,11 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
     private Marker mTestA = new Marker();
     private Marker mTestB = new Marker();
-    private ArrayList<Marker> mTestMarkerArr = new ArrayList<>();
-    private ArrayList<LatLng> mtestLatLngArr = new ArrayList<>();
-    private PolylineOverlay testPolyline = new PolylineOverlay();
-    private int testCheck = 0;
+    private ArrayList<Marker> tMarkerArr = new ArrayList<>();
+    private ArrayList<LatLng> tLatLngArr = new ArrayList<>();
+    private ArrayList<Marker> tMissionArr = new ArrayList<>();
+    private PolylineOverlay tPolyline = new PolylineOverlay();
+    private int tCheck = 0;
 
     private int click = 0;
     private int guidedCheck = 0;
@@ -154,6 +154,8 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         locationOverlay.setVisible(true);
 
         guidedModeLongClick(); //가이드모드 롱-클릭
+
+        test();
     }
 
     //위치 권한 설정하기
@@ -399,6 +401,45 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         });
     }
 
+    public void test() {
+        mTestA.setPosition(new LatLng(35.944329, 126.683966));
+        mTestB.setPosition(new LatLng(35.944314, 126.684320));
+
+        tMissionArr.add(new Marker(new LatLng(mTestA.getPosition().latitude, mTestA.getPosition().longitude)));
+        tMissionArr.add(new Marker(new LatLng(mTestB.getPosition().latitude, mTestB.getPosition().longitude)));
+
+        double tLine = MathUtils.getDistance2D(new LatLong(mTestA.getPosition().latitude, mTestA.getPosition().longitude), new LatLong(mTestB.getPosition().latitude, mTestB.getPosition().longitude));
+
+        double distance = setDistanceTo / setFlightWidth * 2;
+
+        for (int i = 2; i < distance; i++) {
+            if (i % 4 == 0) {
+                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(tMissionArr.get(i - 2).getPosition().latitude, tMissionArr.get(i - 2).getPosition().longitude), new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude)) - 90, setFlightWidth);
+                tMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
+            } else if (i % 4 == 1) {
+                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(tMissionArr.get(i - 2).getPosition().latitude, tMissionArr.get(i - 2).getPosition().longitude), new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude)) -90, tLine);
+                tMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
+            } else if (i % 4 == 2) {
+                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(tMissionArr.get(i - 2).getPosition().latitude, tMissionArr.get(i - 2).getPosition().longitude), new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude)) + 90, setFlightWidth);
+                tMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
+            } else if (i % 4 == 3) {
+                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(tMissionArr.get(i - 2).getPosition().latitude, tMissionArr.get(i - 2).getPosition().longitude), new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude)) + 90, tLine);
+                tMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
+            }
+        }
+
+
+        for (int i = 0; i < tMissionArr.size(); i++) {
+            tLatLngArr.add(tMissionArr.get(i).getPosition());
+        }
+
+        for (int i = 0; i < tMissionArr.size(); i++) {
+            tPolyline.setCoords(tLatLngArr);
+
+            tPolyline.setColor(0x7fffffff);
+            tPolyline.setMap(mNaverMap);
+        }
+    }
 
     //--------------------Drone UI--------------------//
 
@@ -679,20 +720,6 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         Log.d("mylog", "위도: " + droneGpsPosition.getLatitude() + ", 경도: " + droneGpsPosition.getLongitude());
     }
 
-    private void checkGuidedMode() {
-        State vehicleState = drone.getAttribute(AttributeType.STATE);
-        VehicleMode vehicleMode = vehicleState.getVehicleMode();
-
-        if (vehicleMode == VehicleMode.COPTER_GUIDED && guidedCheck == 1) {
-            if (CheckGoal(drone, new LatLng(mTargetMarker.getPosition().latitude, mTargetMarker.getPosition().longitude))) {
-                alertUser("기체가 목적지에 도착했습니다.");
-                updateLoiterMode();
-                mTargetMarker.setMap(null);
-                guidedCheck = 0;
-            }
-        }
-    }
-
     //비행 경로 그리기
     protected void setGpsPolyLine() {
         Gps droneGps = this.drone.getAttribute(AttributeType.GPS);
@@ -731,16 +758,16 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
     //리사이클러뷰 추가
     protected void setRecyclerView() {
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(layoutManager); //new LinearLayoutManager(this)
-
-        layoutManager.setReverseLayout(true); //역순 출력
-        layoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         SimpleTextAdapter adapter = new SimpleTextAdapter(list);
         recyclerView.setAdapter(adapter);
+
+        recyclerView.smoothScrollToPosition(adapter.getItemCount());
+
+        //layoutManager.setReverseLayout(true); //역순 출력
+        //layoutManager.setStackFromEnd(true);
     }
 
     //마커 커스텀
@@ -826,6 +853,21 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         });
     }
 
+    //목적지 도착 확인
+    private void checkGuidedMode() {
+        State vehicleState = drone.getAttribute(AttributeType.STATE);
+        VehicleMode vehicleMode = vehicleState.getVehicleMode();
+
+        if (vehicleMode == VehicleMode.COPTER_GUIDED && guidedCheck == 1) {
+            if (CheckGoal(drone, new LatLng(mTargetMarker.getPosition().latitude, mTargetMarker.getPosition().longitude))) {
+                alertUser("기체가 목적지에 도착했습니다.");
+                updateLoiterMode();
+                mTargetMarker.setMap(null);
+                guidedCheck = 0;
+            }
+        }
+    }
+
     //로이터 모드 전환
     public void updateLoiterMode() {
         VehicleApi.getApi(drone).setVehicleMode(VehicleMode.COPTER_LOITER, new SimpleCommandListener() {
@@ -846,7 +888,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         });
     }
 
-    //목적지 도착 확인
+    //목적지 도착 체크
     public static boolean CheckGoal(final Drone drone, LatLng recentLatLng) {
         Gps droneGps = drone.getAttribute(AttributeType.GPS);
         LatLng droneGpsPosition = new LatLng(droneGps.getPosition().getLatitude(), droneGps.getPosition().getLongitude());

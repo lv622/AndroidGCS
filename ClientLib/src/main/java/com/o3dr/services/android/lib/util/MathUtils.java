@@ -394,8 +394,7 @@ public class MathUtils {
      * @param distance  distance to be added
      * @return          new point with the added distance
      */
-    public static LatLong newCoordFromBearingAndDistance(LatLong origin, double bearing,
-                                                         double distance) {
+    public static LatLong newCoordFromBearingAndDistance(LatLong origin, double bearing, double distance) {
         double lat = origin.getLatitude();
         double lon = origin.getLongitude();
         double lat1 = Math.toRadians(lat);
