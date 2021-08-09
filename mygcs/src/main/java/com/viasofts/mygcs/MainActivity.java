@@ -38,16 +38,20 @@ import com.naver.maps.map.util.FusedLocationSource;
 import com.o3dr.android.client.ControlTower;
 import com.o3dr.android.client.Drone;
 import com.o3dr.android.client.apis.ControlApi;
+import com.o3dr.android.client.apis.MissionApi;
 import com.o3dr.android.client.apis.VehicleApi;
 import com.o3dr.android.client.interfaces.DroneListener;
 import com.o3dr.android.client.interfaces.LinkListener;
 import com.o3dr.android.client.interfaces.TowerListener;
 import com.o3dr.services.android.lib.coordinate.LatLong;
+import com.o3dr.services.android.lib.coordinate.LatLongAlt;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEvent;
 import com.o3dr.services.android.lib.drone.attribute.AttributeType;
 import com.o3dr.services.android.lib.drone.companion.solo.SoloAttributes;
 import com.o3dr.services.android.lib.drone.companion.solo.SoloState;
 import com.o3dr.services.android.lib.drone.connection.ConnectionParameter;
+import com.o3dr.services.android.lib.drone.mission.Mission;
+import com.o3dr.services.android.lib.drone.mission.item.spatial.Waypoint;
 import com.o3dr.services.android.lib.drone.property.Altitude;
 import com.o3dr.services.android.lib.drone.property.Attitude;
 import com.o3dr.services.android.lib.drone.property.Battery;
@@ -89,14 +93,16 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     private Marker mDroneMarker = new Marker();
     private Marker mTargetMarker = new Marker();
     private ArrayList<LatLng> mLatLngArr = new ArrayList<>();
-    private PolylineOverlay polyline = new PolylineOverlay();
+    private PolylineOverlay mDronePolyline = new PolylineOverlay();
 
-    private Marker mTestA = new Marker();
-    private Marker mTestB = new Marker();
-    private ArrayList<LatLng> tLatLngArr = new ArrayList<>();
-    private ArrayList<Marker> tMissionArr = new ArrayList<>();
-    private PolylineOverlay tPolyline = new PolylineOverlay();
     private int tCheck = 0;
+    private Marker mMarkerA = new Marker();
+    private Marker mMarkerB = new Marker();
+    private ArrayList<LatLng> mMissionLatLngArr = new ArrayList<>();
+    private ArrayList<Marker> mMissionArr = new ArrayList<>();
+    private PolylineOverlay mMissionPolyline = new PolylineOverlay();
+    private Mission mMission = new Mission();
+    private Waypoint mWaypoint = new Waypoint();
 
     private int click = 0;
     private int guidedCheck = 0;
@@ -258,269 +264,6 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             fm.beginTransaction().add(R.id.map, mapFragment).commit();
         }
         mapFragment.getMapAsync(this);
-    }
-
-    //--------------------drone Mission--------------------//
-
-    //임무 버튼 UI
-    protected void setMission() {
-        final Button btnMission = (Button) findViewById(R.id.btnMissionStatic),
-                btnAtoB = (Button) findViewById(R.id.btnAtoB),
-                btnPolygon = (Button) findViewById(R.id.btnPolygon),
-                btnCancel = (Button) findViewById(R.id.btnCancel),
-                btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
-
-        btnMission.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (btnAtoB.getVisibility() == v.INVISIBLE) {
-                    btnAtoB.setVisibility(View.VISIBLE);
-                    btnPolygon.setVisibility(View.VISIBLE);
-                    btnCancel.setVisibility(View.VISIBLE);
-                } else {
-                    btnAtoB.setVisibility(View.INVISIBLE);
-                    btnPolygon.setVisibility(View.INVISIBLE);
-                    btnCancel.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
-
-        btnAtoB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnMission.setText("AB");
-                btnAtoB.setVisibility(View.INVISIBLE);
-                btnPolygon.setVisibility(View.INVISIBLE);
-                btnCancel.setVisibility(View.INVISIBLE);
-
-                btnAtoBStatic.setVisibility(View.VISIBLE);
-                tCheck = 1;
-
-                updateBtnMission(tCheck);
-            }
-        });
-
-        btnPolygon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnMission.setText("다각형");
-                btnAtoB.setVisibility(View.INVISIBLE);
-                btnPolygon.setVisibility(View.INVISIBLE);
-                btnCancel.setVisibility(View.INVISIBLE);
-
-                btnAtoBStatic.setVisibility(View.INVISIBLE);
-            }
-        });
-
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnMission.setText("임무");
-                btnAtoB.setVisibility(View.INVISIBLE);
-                btnPolygon.setVisibility(View.INVISIBLE);
-                btnCancel.setVisibility(View.INVISIBLE);
-
-                btnAtoBStatic.setVisibility(View.INVISIBLE);
-            }
-        });
-    }
-
-    //비행폭 버튼, UI
-    protected void setFlightWidth() {
-        final Button btnflightWidth = (Button) findViewById(R.id.btnflightWidth),
-                btnWidthUp = (Button) findViewById(R.id.btnflightWidthUp),
-                btnWidthDown = (Button) findViewById(R.id.btnflightWidthDown);
-
-        btnflightWidth.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (btnWidthUp.getVisibility() == v.INVISIBLE) {
-                    btnWidthUp.setVisibility(View.VISIBLE);
-                    btnWidthDown.setVisibility(View.VISIBLE);
-                } else {
-                    btnWidthUp.setVisibility(View.INVISIBLE);
-                    btnWidthDown.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
-
-        btnWidthUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (setFlightWidth < 10) {
-                    setFlightWidth += 0.5;
-                    textFlightWidth = setFlightWidth + "M\n비행폭";
-                    btnflightWidth.setText(textFlightWidth);
-                }
-            }
-        });
-
-        btnWidthDown.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (setFlightWidth > 3) {
-                    setFlightWidth -= 0.5;
-                    textFlightWidth = setFlightWidth + "M\n비행폭";
-                    btnflightWidth.setText(textFlightWidth);
-                }
-            }
-        });
-    }
-
-    //A-B거리 UI
-    protected void setDistanceAtoB() {
-        final Button btnDistanceTo = (Button) findViewById(R.id.btnDistanceTo),
-                btnDistanceUp = (Button) findViewById(R.id.btnDistanceToUp),
-                btnDistanceDown = (Button) findViewById(R.id.btnDistanceToDown);
-
-        btnDistanceTo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (btnDistanceUp.getVisibility() == v.INVISIBLE) {
-                    btnDistanceUp.setVisibility(View.VISIBLE);
-                    btnDistanceDown.setVisibility(View.VISIBLE);
-                } else {
-                    btnDistanceUp.setVisibility(View.INVISIBLE);
-                    btnDistanceDown.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
-
-        btnDistanceUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (setDistanceTo < 80) {
-                    setDistanceTo += 10;
-                    textDistanceTo = setDistanceTo + "M\nAB거리";
-                    btnDistanceTo.setText(textDistanceTo);
-                }
-            }
-        });
-
-        btnDistanceDown.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (setDistanceTo > 30) {
-                    setDistanceTo -= 10;
-                    textDistanceTo = setDistanceTo + "M\nAB거리";
-                    btnDistanceTo.setText(textDistanceTo);
-                }
-            }
-        });
-    }
-
-    //임무설정 버튼 UI
-    protected void updateBtnMission(int check) {
-        final Button btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
-
-        switch (check) {
-            case 1:
-                btnAtoBStatic.setText("A지점 설정");
-                setAMarker();
-                break;
-            case 2:
-                btnAtoBStatic.setText("B지점 설정");
-                setBMarker();
-                break;
-            case 3:
-                btnAtoBStatic.setText("임무 전송");
-                setDistance();
-                break;
-            case 4:
-                btnAtoBStatic.setText("임무 시작");
-                break;
-            case 5:
-                btnAtoBStatic.setText("임무 종료");
-                break;
-        }
-    }
-
-    //A 마커 설정
-    public void setAMarker() {
-        final Button btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
-
-        mNaverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(@NonNull @NotNull PointF pointF, @NonNull @NotNull LatLng latLng) {
-                mTestA.setPosition(new LatLng(latLng.latitude, latLng.longitude));
-                markerCustom(mTestA);
-            }
-        });
-
-        btnAtoBStatic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tCheck = 2;
-                tMissionArr.add(new Marker(new LatLng(mTestA.getPosition().latitude, mTestA.getPosition().longitude)));
-                updateBtnMission(tCheck);
-            }
-        });
-    }
-
-    //B 마커 설정
-    public void setBMarker() {
-        final Button btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
-
-        mNaverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(@NonNull @NotNull PointF pointF, @NonNull @NotNull LatLng latLng) {
-                mTestB.setPosition(new LatLng(latLng.latitude, latLng.longitude));
-                markerCustom(mTestB);
-            }
-        });
-
-        btnAtoBStatic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tCheck = 3;
-                tMissionArr.add(new Marker(new LatLng(mTestB.getPosition().latitude, mTestB.getPosition().longitude)));
-                updateBtnMission(tCheck);
-            }
-        });
-    }
-
-    //AB 지점 폴리라인
-    public void setDistance() {
-        double tLine = MathUtils.getDistance2D(new LatLong(tMissionArr.get(0).getPosition().latitude, tMissionArr.get(0).getPosition().longitude), new LatLong(tMissionArr.get(1).getPosition().latitude, tMissionArr.get(1).getPosition().longitude));
-        double distance = setDistanceTo / setFlightWidth * 2;
-
-        for (int i = 2; i < distance; i++) {
-            if (i % 4 == 0) {
-                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(tMissionArr.get(i - 2).getPosition().latitude, tMissionArr.get(i - 2).getPosition().longitude), new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude)) - 90, setFlightWidth);
-                tMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
-            } else if (i % 4 == 1) {
-                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(tMissionArr.get(i - 2).getPosition().latitude, tMissionArr.get(i - 2).getPosition().longitude), new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude)) - 90, tLine);
-                tMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
-            } else if (i % 4 == 2) {
-                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(tMissionArr.get(i - 2).getPosition().latitude, tMissionArr.get(i - 2).getPosition().longitude), new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude)) + 90, setFlightWidth);
-                tMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
-            } else if (i % 4 == 3) {
-                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(tMissionArr.get(i - 2).getPosition().latitude, tMissionArr.get(i - 2).getPosition().longitude), new LatLong(tMissionArr.get(i - 1).getPosition().latitude, tMissionArr.get(i - 1).getPosition().longitude)) + 90, tLine);
-                tMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
-            }
-        }
-
-        for (int i = 0; i < tMissionArr.size(); i++) {
-            tLatLngArr.add(tMissionArr.get(i).getPosition());
-        }
-
-        for (int i = 0; i < tMissionArr.size(); i++) {
-            tPolyline.setCoords(tLatLngArr);
-
-            tPolyline.setColor(Color.YELLOW);
-            tPolyline.setWidth(10);
-            tPolyline.setCapType(PolylineOverlay.LineCap.Round);
-            tPolyline.setMap(mNaverMap);
-        }
-
-        final Button btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
-
-        btnAtoBStatic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tCheck = 4;
-            }
-        });
     }
 
     //--------------------Drone UI--------------------//
@@ -794,7 +537,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
         mDroneMarker.setPosition(new LatLng(droneGpsPosition.getLatitude(), droneGpsPosition.getLongitude()));
         mDroneMarker.setAngle((float) droneYaw);
-        //mDroneMarker.setAnchor(new PointF(0.5F, 0.9F));
+        mDroneMarker.setAnchor(new PointF(0.5F, 0.9F));
         markerCustom(mDroneMarker);
 
         checkGuidedMode();
@@ -810,12 +553,12 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         mLatLngArr.add(new LatLng(droneGpsPosition.getLatitude(), droneGpsPosition.getLongitude()));
 
         for (int i = 0; i < mLatLngArr.size(); i++) {
-            polyline.setCoords(mLatLngArr);
+            mDronePolyline.setCoords(mLatLngArr);
         }
 
-        polyline.setColor(Color.WHITE);
-        polyline.setWidth(5);
-        polyline.setMap(mNaverMap);
+        mDronePolyline.setColor(Color.WHITE);
+        mDronePolyline.setWidth(5);
+        mDronePolyline.setMap(mNaverMap);
     }
 
     //리사이클러뷰 추가
@@ -841,17 +584,15 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             public void onClick(View v) {
                 list.clear();
                 mLatLngArr.clear();
-                polyline.setMap(null);
-
+                mDronePolyline.setMap(null);
                 mTargetMarker.setMap(null);
 
+                mMarkerA.setMap(null);
+                mMarkerB.setMap(null);
+                mMissionPolyline.setMap(null);
+                mMissionLatLngArr.clear();
+                mMissionArr.clear();
                 tCheck = 0;
-                mTestA.setMap(null);
-                mTestB.setMap(null);
-                tPolyline.setMap(null);
-                tLatLngArr.clear();
-                tMissionArr.clear();
-
             }
         });
     }
@@ -868,14 +609,16 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             marker.setHeight(280);
             marker.setIcon(OverlayImage.fromResource(R.drawable.icon_drone));
             marker.setMap(mNaverMap);
-        } else if (marker == mTestA) {
-            marker.setWidth(80);
-            marker.setHeight(80);
+        } else if (marker == mMarkerA) {
+            marker.setWidth(60);
+            marker.setHeight(60);
+            marker.setAnchor(new PointF(0.5F, 0.5F));
             marker.setIcon(OverlayImage.fromResource(R.drawable.icon_a));
             marker.setMap(mNaverMap);
-        } else if (marker == mTestB) {
-            marker.setWidth(80);
-            marker.setHeight(80);
+        } else if (marker == mMarkerB) {
+            marker.setWidth(60);
+            marker.setHeight(60);
+            marker.setAnchor(new PointF(0.5F, 0.5F));
             marker.setIcon(OverlayImage.fromResource(R.drawable.icon_b));
             marker.setMap(mNaverMap);
         } else {
@@ -884,6 +627,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             marker.setMap(mNaverMap);
         }
     }
+
 
     //--------------------Guided Mode--------------------//
 
@@ -905,26 +649,6 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
                 } else {
                     onGuidedModeClickHandler();
                 }
-            }
-        });
-    }
-
-    //가이드 모드 전환
-    public void updateGuidedMode() {
-        VehicleApi.getApi(drone).setVehicleMode(VehicleMode.COPTER_GUIDED, new SimpleCommandListener() {
-            @Override
-            public void onSuccess() {
-                alertUser("Guided MODE...");
-            }
-
-            @Override
-            public void onError(int i) {
-                alertUser("Error to Guided MODE.");
-            }
-
-            @Override
-            public void onTimeout() {
-                alertUser("Time Out to Guided MODE.");
             }
         });
     }
@@ -964,31 +688,365 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         }
     }
 
-    //로이터 모드 전환
-    public void updateLoiterMode() {
-        VehicleApi.getApi(drone).setVehicleMode(VehicleMode.COPTER_LOITER, new SimpleCommandListener() {
-            @Override
-            public void onSuccess() {
-                alertUser("LOITER MODE...");
-            }
-
-            @Override
-            public void onError(int i) {
-                alertUser("Error to LOITER MODE.");
-            }
-
-            @Override
-            public void onTimeout() {
-                alertUser("Time Out to LOITER MODE.");
-            }
-        });
-    }
-
     //목적지 도착 체크
     public static boolean CheckGoal(final Drone drone, LatLng recentLatLng) {
         Gps droneGps = drone.getAttribute(AttributeType.GPS);
         LatLng droneGpsPosition = new LatLng(droneGps.getPosition().getLatitude(), droneGps.getPosition().getLongitude());
         return droneGpsPosition.distanceTo(recentLatLng) <= 1;
+    }
+
+
+    //--------------------drone Mission--------------------//
+
+    //임무 버튼 UI
+    protected void setMission() {
+        final Button btnMission = (Button) findViewById(R.id.btnMissionStatic),
+                btnAtoB = (Button) findViewById(R.id.btnAtoB),
+                btnPolygon = (Button) findViewById(R.id.btnPolygon),
+                btnCancel = (Button) findViewById(R.id.btnCancel),
+                btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
+
+        btnMission.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (btnAtoB.getVisibility() == v.INVISIBLE) {
+                    btnAtoB.setVisibility(View.VISIBLE);
+                    btnPolygon.setVisibility(View.VISIBLE);
+                    btnCancel.setVisibility(View.VISIBLE);
+                } else {
+                    btnAtoB.setVisibility(View.INVISIBLE);
+                    btnPolygon.setVisibility(View.INVISIBLE);
+                    btnCancel.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        btnAtoB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnMission.setText("AB");
+                btnAtoB.setVisibility(View.INVISIBLE);
+                btnPolygon.setVisibility(View.INVISIBLE);
+                btnCancel.setVisibility(View.INVISIBLE);
+
+                btnAtoBStatic.setVisibility(View.VISIBLE);
+                tCheck = 1;
+
+                updateBtnMission(tCheck);
+            }
+        });
+
+        btnPolygon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnMission.setText("다각형");
+                btnAtoB.setVisibility(View.INVISIBLE);
+                btnPolygon.setVisibility(View.INVISIBLE);
+                btnCancel.setVisibility(View.INVISIBLE);
+
+                btnAtoBStatic.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnMission.setText("임무");
+                btnAtoB.setVisibility(View.INVISIBLE);
+                btnPolygon.setVisibility(View.INVISIBLE);
+                btnCancel.setVisibility(View.INVISIBLE);
+
+                btnAtoBStatic.setVisibility(View.INVISIBLE);
+            }
+        });
+    }
+
+    //비행폭 버튼, UI
+    protected void setFlightWidth() {
+        final Button btnflightWidth = (Button) findViewById(R.id.btnflightWidth),
+                btnWidthUp = (Button) findViewById(R.id.btnflightWidthUp),
+                btnWidthDown = (Button) findViewById(R.id.btnflightWidthDown);
+
+        btnflightWidth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (btnWidthUp.getVisibility() == v.INVISIBLE) {
+                    btnWidthUp.setVisibility(View.VISIBLE);
+                    btnWidthDown.setVisibility(View.VISIBLE);
+                } else {
+                    btnWidthUp.setVisibility(View.INVISIBLE);
+                    btnWidthDown.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        btnWidthUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (setFlightWidth < 10) {
+                    setFlightWidth += 0.5;
+                    textFlightWidth = setFlightWidth + "M\n비행폭";
+                    btnflightWidth.setText(textFlightWidth);
+                }
+            }
+        });
+
+        btnWidthDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (setFlightWidth > 3) {
+                    setFlightWidth -= 0.5;
+                    textFlightWidth = setFlightWidth + "M\n비행폭";
+                    btnflightWidth.setText(textFlightWidth);
+                }
+            }
+        });
+    }
+
+    //A-B거리 UI
+    protected void setDistanceAtoB() {
+        final Button btnDistanceTo = (Button) findViewById(R.id.btnDistanceTo),
+                btnDistanceUp = (Button) findViewById(R.id.btnDistanceToUp),
+                btnDistanceDown = (Button) findViewById(R.id.btnDistanceToDown);
+
+        btnDistanceTo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (btnDistanceUp.getVisibility() == v.INVISIBLE) {
+                    btnDistanceUp.setVisibility(View.VISIBLE);
+                    btnDistanceDown.setVisibility(View.VISIBLE);
+                } else {
+                    btnDistanceUp.setVisibility(View.INVISIBLE);
+                    btnDistanceDown.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        btnDistanceUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (setDistanceTo < 80) {
+                    setDistanceTo += 10;
+                    textDistanceTo = setDistanceTo + "M\nAB거리";
+                    btnDistanceTo.setText(textDistanceTo);
+                }
+            }
+        });
+
+        btnDistanceDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (setDistanceTo > 30) {
+                    setDistanceTo -= 10;
+                    textDistanceTo = setDistanceTo + "M\nAB거리";
+                    btnDistanceTo.setText(textDistanceTo);
+                }
+            }
+        });
+    }
+
+    //임무설정 버튼 UI
+    protected void updateBtnMission(int check) {
+        final Button btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
+
+        switch (check) {
+            case 0:
+                btnAtoBStatic.setText("임무 설정");
+                break;
+            case 1:
+                btnAtoBStatic.setText("A지점 설정");
+                setAMarker();
+                break;
+            case 2:
+                btnAtoBStatic.setText("B지점 설정");
+                setBMarker();
+                break;
+            case 3:
+                btnAtoBStatic.setText("임무 전송");
+                sentMission();
+                break;
+            case 4:
+                btnAtoBStatic.setText("임무 시작");
+                updateMissionStart();
+                break;
+            case 5:
+                btnAtoBStatic.setText("임무 중지");
+                updateMissionPause();
+                break;
+        }
+    }
+
+    //A 마커 설정 (1)
+    public void setAMarker() {
+        final Button btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
+
+        mNaverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(@NonNull @NotNull PointF pointF, @NonNull @NotNull LatLng latLng) {
+                mMarkerA.setPosition(new LatLng(latLng.latitude, latLng.longitude));
+                markerCustom(mMarkerA);
+            }
+        });
+
+        btnAtoBStatic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tCheck = 2;
+                mMissionArr.add(new Marker(new LatLng(mMarkerA.getPosition().latitude, mMarkerA.getPosition().longitude)));
+                updateBtnMission(tCheck);
+            }
+        });
+    }
+
+    //B 마커 설정 (2)
+    public void setBMarker() {
+        final Button btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
+
+        mNaverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(@NonNull @NotNull PointF pointF, @NonNull @NotNull LatLng latLng) {
+                mMarkerB.setPosition(new LatLng(latLng.latitude, latLng.longitude));
+                markerCustom(mMarkerB);
+            }
+        });
+
+        btnAtoBStatic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tCheck = 3;
+                mMissionArr.add(new Marker(new LatLng(mMarkerB.getPosition().latitude, mMarkerB.getPosition().longitude)));
+                setDistance();
+                updateBtnMission(tCheck);
+            }
+        });
+    }
+
+    //AB 지점 폴리라인
+    public void setDistance() {
+        double tLine = MathUtils.getDistance2D(new LatLong(mMissionArr.get(0).getPosition().latitude, mMissionArr.get(0).getPosition().longitude), new LatLong(mMissionArr.get(1).getPosition().latitude, mMissionArr.get(1).getPosition().longitude));
+        double distance = (int) (setDistanceTo / setFlightWidth * 2);
+
+        if (distance % 4 == 1 || distance % 4 == 2) {
+            if (distance % 4 == 1) {
+                distance += 3;
+            } else if (distance % 4 == 2) {
+                distance += 2;
+            }
+        }
+
+        for (int i = 2; i < distance; i++) {
+            if (i % 4 == 0) {
+                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(mMissionArr.get(i - 1).getPosition().latitude, mMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(mMissionArr.get(i - 2).getPosition().latitude, mMissionArr.get(i - 2).getPosition().longitude), new LatLong(mMissionArr.get(i - 1).getPosition().latitude, mMissionArr.get(i - 1).getPosition().longitude)) - 90, setFlightWidth);
+                mMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
+            } else if (i % 4 == 1) {
+                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(mMissionArr.get(i - 1).getPosition().latitude, mMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(mMissionArr.get(i - 2).getPosition().latitude, mMissionArr.get(i - 2).getPosition().longitude), new LatLong(mMissionArr.get(i - 1).getPosition().latitude, mMissionArr.get(i - 1).getPosition().longitude)) - 90, tLine);
+                mMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
+            } else if (i % 4 == 2) {
+                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(mMissionArr.get(i - 1).getPosition().latitude, mMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(mMissionArr.get(i - 2).getPosition().latitude, mMissionArr.get(i - 2).getPosition().longitude), new LatLong(mMissionArr.get(i - 1).getPosition().latitude, mMissionArr.get(i - 1).getPosition().longitude)) + 90, setFlightWidth);
+                mMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
+            } else if (i % 4 == 3) {
+                LatLong tLat = MathUtils.newCoordFromBearingAndDistance(new LatLong(mMissionArr.get(i - 1).getPosition().latitude, mMissionArr.get(i - 1).getPosition().longitude), MathUtils.getHeadingFromCoordinates(new LatLong(mMissionArr.get(i - 2).getPosition().latitude, mMissionArr.get(i - 2).getPosition().longitude), new LatLong(mMissionArr.get(i - 1).getPosition().latitude, mMissionArr.get(i - 1).getPosition().longitude)) + 90, tLine);
+                mMissionArr.add(new Marker(new LatLng(tLat.getLatitude(), tLat.getLongitude())));
+            }
+        }
+
+        for (int i = 0; i < mMissionArr.size(); i++) {
+            mMissionLatLngArr.add(mMissionArr.get(i).getPosition());
+        }
+
+        for (int i = 0; i < mMissionArr.size(); i++) {
+            mMissionPolyline.setCoords(mMissionLatLngArr);
+
+            mMissionPolyline.setColor(Color.YELLOW);
+            mMissionPolyline.setWidth(10);
+            mMissionPolyline.setCapType(PolylineOverlay.LineCap.Round);
+            mMissionPolyline.setMap(mNaverMap);
+        }
+    }
+
+    //임무 전송 (3)
+    protected void sentMission() {
+        final Button btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
+        final Altitude droneAltitude = this.drone.getAttribute(AttributeType.ALTITUDE);
+
+        btnAtoBStatic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for (int i = 0; i < mMissionLatLngArr.size(); i++) {
+                    mWaypoint.setCoordinate(new LatLongAlt(mMissionLatLngArr.get(i).latitude, mMissionLatLngArr.get(i).longitude, droneAltitude.getAltitude()));
+                    mWaypoint.setDelay(1);
+                    mMission.addMissionItem(i, mWaypoint);
+
+                    Log.d("test_point", i + " / " + mWaypoint);
+                }
+
+                MissionApi.getApi(drone).setMission(mMission, true);
+
+                tCheck = 4;
+                updateBtnMission(tCheck);
+            }
+        });
+    }
+
+    //임무 시작 (4)
+    protected void updateMissionStart() {
+        final Button btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
+
+        btnAtoBStatic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MissionApi.getApi(drone).startMission(true, true, new AbstractCommandListener() {
+                    @Override
+                    public void onSuccess() {
+                        alertUser("Mission Start...");
+                    }
+
+                    @Override
+                    public void onError(int executionError) {
+                        alertUser("Error to Mission Start." + executionError);
+                    }
+
+                    @Override
+                    public void onTimeout() {
+                        alertUser("Timeout to Mission Start.");
+                    }
+                });
+
+                tCheck = 5;
+                updateBtnMission(tCheck);
+            }
+        });
+    }
+
+    //임무 중지 (5)
+    protected void updateMissionPause() {
+        final Button btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
+
+        btnAtoBStatic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MissionApi.getApi(drone).pauseMission(new AbstractCommandListener() {
+                    @Override
+                    public void onSuccess() {
+                        alertUser("Mission Pause...");
+                        updateLoiterMode();
+
+                        tCheck = 4;
+                        updateBtnMission(tCheck);
+                    }
+
+                    @Override
+                    public void onError(int executionError) {
+                        alertUser("Error to Mission Pause.");
+                    }
+
+                    @Override
+                    public void onTimeout() {
+                        alertUser("Timeout to Mission Pause.");
+                    }
+                });
+            }
+        });
     }
 
 
@@ -1090,6 +1148,68 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    //--------------------drone Mode--------------------//
+
+    //가이드 모드 전환
+    public void updateGuidedMode() {
+        VehicleApi.getApi(drone).setVehicleMode(VehicleMode.COPTER_GUIDED, new SimpleCommandListener() {
+            @Override
+            public void onSuccess() {
+                alertUser("Guided MODE...");
+            }
+
+            @Override
+            public void onError(int i) {
+                alertUser("Error to Guided MODE.");
+            }
+
+            @Override
+            public void onTimeout() {
+                alertUser("Time Out to Guided MODE.");
+            }
+        });
+    }
+
+    //로이터 모드 전환
+    public void updateLoiterMode() {
+        VehicleApi.getApi(drone).setVehicleMode(VehicleMode.COPTER_LOITER, new SimpleCommandListener() {
+            @Override
+            public void onSuccess() {
+                alertUser("LOITER MODE...");
+            }
+
+            @Override
+            public void onError(int i) {
+                alertUser("Error to LOITER MODE.");
+            }
+
+            @Override
+            public void onTimeout() {
+                alertUser("Time Out to LOITER MODE.");
+            }
+        });
+    }
+
+    //오토 모드 전환
+    public void updateAutoMode() {
+        VehicleApi.getApi(drone).setVehicleMode(VehicleMode.COPTER_AUTO, new SimpleCommandListener() {
+            @Override
+            public void onSuccess() {
+                alertUser("Auto MODE...");
+            }
+
+            @Override
+            public void onError(int i) {
+                alertUser("Error to Auto MODE.");
+            }
+
+            @Override
+            public void onTimeout() {
+                alertUser("Time Out to Auto MODE.");
+            }
+        });
     }
 
 
