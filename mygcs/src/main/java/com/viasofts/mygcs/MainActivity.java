@@ -92,49 +92,6 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
     private Spinner modeSelector;
 
-    private Marker mDroneMarker = new Marker();
-    private Marker mTargetMarker = new Marker();
-    private ArrayList<LatLng> mLatLngArr = new ArrayList<>();
-    private PolylineOverlay mDronePolyline = new PolylineOverlay();
-
-    private int mCheck = 0;
-    private Marker mMarkerA = new Marker();
-    private Marker mMarkerB = new Marker();
-    private ArrayList<LatLng> mABLatLngArr = new ArrayList<>();
-    private ArrayList<Marker> mABMarkerArr = new ArrayList<>();
-    private PolylineOverlay mABolyline = new PolylineOverlay();
-
-    private Mission mMission = new Mission();
-    private Waypoint mWaypoint = new Waypoint();
-
-
-    private ArrayList<LatLng> tPolygonLatArr = new ArrayList<>();
-    private ArrayList<Marker> tPolygonMarkerArr = new ArrayList<>();
-    private PolygonOverlay mPolygon = new PolygonOverlay();
-
-    private ArrayList<LatLng> tSortPolygonArr = new ArrayList<>();
-
-    private ArrayList<Marker> boundsMarker = new ArrayList<>();
-    private ArrayList<Marker> tboundsMarkerArr = new ArrayList<>();
-    private ArrayList<LatLng> tboundsLatLngArr = new ArrayList<>();
-
-    private ArrayList<Marker> tMissionMarkerArr = new ArrayList<>();
-    private ArrayList<LatLng> tMissionLatLngArr = new ArrayList<>();
-
-    private ArrayList<Double> mAngleArr = new ArrayList<>();
-    private double compareDistance = 0;
-    private double longDistance = 0;
-    private int indexX, indexY;
-
-    private PolygonOverlay tPolygon = new PolygonOverlay();
-    private PolylineOverlay tPolyline = new PolylineOverlay();
-
-    private LatLng tCenter;
-
-    //삭제
-    private Marker tMarker = new Marker();
-
-
     private int click = 0;
     private int guidedCheck = 0;
 
@@ -144,8 +101,41 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
     private ArrayList<String> list = new ArrayList<>();
 
-    Handler mainHandler;
+    private Marker mDroneMarker = new Marker();
+    private Marker mTargetMarker = new Marker();
+    private ArrayList<LatLng> mLatLngArr = new ArrayList<>();
+    private PolylineOverlay mDronePolyline = new PolylineOverlay();
 
+    private Mission mMission = new Mission();
+    private Waypoint mWaypoint = new Waypoint();
+    private ArrayList<Marker> mMissionMarkerArr = new ArrayList<>();
+    private ArrayList<LatLng> mMissionLatLngArr = new ArrayList<>();
+
+    private int mCheck = 0;
+    private Marker mMarkerA = new Marker();
+    private Marker mMarkerB = new Marker();
+    private PolylineOverlay mABolyline = new PolylineOverlay();
+
+    private ArrayList<Double> mAngleArr = new ArrayList<>();
+    private double compareDistance = 0;
+    private double longDistance = 0;
+    private int indexX = 0, indexY = 0;
+    private double mBearing = 0;
+
+    private PolylineOverlay tPolyline = new PolylineOverlay();
+
+    private LatLng mBoundsCenter;
+
+    private ArrayList<LatLng> mPolygonLatArr = new ArrayList<>();
+    private ArrayList<Marker> mPolygonMarkerArr = new ArrayList<>();
+    private PolygonOverlay mPolygon = new PolygonOverlay();
+    private ArrayList<LatLng> mSortPolygonArr = new ArrayList<>();
+
+    private ArrayList<Marker> mBoundsArr = new ArrayList<>();
+    private ArrayList<Marker> mBoundsMarkerArr = new ArrayList<>();
+    private ArrayList<LatLng> mBoundsLatLngArr = new ArrayList<>();
+
+    Handler mainHandler;
 
     @Override
     public void onStart() {
@@ -305,28 +295,26 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         mNaverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull @NotNull PointF pointF, @NonNull @NotNull LatLng latLng) {
-                tPolygonMarkerArr.add(new Marker(toLatLng(latLng)));
-                tPolygonLatArr.add(toLatLng(latLng));
+                mPolygonMarkerArr.add(new Marker(toLatLng(latLng)));
+                mPolygonLatArr.add(toLatLng(latLng));
 
-                for (int i = 0; i < tPolygonMarkerArr.size(); i++) {
-                    markerCustom(tPolygonMarkerArr.get(i));
-                    tPolygonMarkerArr.get(i).setMap(mNaverMap);
+                for (int i = 0; i < mPolygonMarkerArr.size(); i++) {
+                    markerCustom(mPolygonMarkerArr.get(i));
+                    mPolygonMarkerArr.get(i).setMap(mNaverMap);
                 }
 
-                LatLngBounds bounds = new LatLngBounds.Builder().include(tPolygonLatArr).build();
+                LatLngBounds bounds = new LatLngBounds.Builder().include(mPolygonLatArr).build();
 
-                tCenter = bounds.getCenter();
+                mBoundsCenter = bounds.getCenter();
 
-                tMarker.setPosition(tCenter); //.
-                markerCustom(tMarker); //.
-
-                if (tPolygonLatArr.size() > 2) {
+                if (mPolygonLatArr.size() > 2) {
                     sortingPolygon();
                     setLongLength();
                     setBounds();
+                    setBoundsRotation();
                     setBoundsLine();
 
-                    mPolygon.setCoords(tSortPolygonArr);
+                    mPolygon.setCoords(mSortPolygonArr);
                     mPolygon.setColor(0x9fffffff);
                     mPolygon.setMap(mNaverMap);
                 }
@@ -337,17 +325,17 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     //폴리곤 정렬
     protected void sortingPolygon() {
         mAngleArr.clear();
-        tSortPolygonArr.clear();
+        mSortPolygonArr.clear();
 
-        for (int i = 0; i < tPolygonLatArr.size(); i++) {
-            mAngleArr.add(i, MathUtils.getHeadingFromCoordinates(toLatLong(tPolygonLatArr.get(i)), toLatLong(tCenter)));
-            tSortPolygonArr.add(i, tPolygonLatArr.get(i));
+        for (int i = 0; i < mPolygonLatArr.size(); i++) {
+            mAngleArr.add(i, MathUtils.getHeadingFromCoordinates(toLatLong(mPolygonLatArr.get(i)), toLatLong(mBoundsCenter)));
+            mSortPolygonArr.add(i, mPolygonLatArr.get(i));
         }
 
-        for (int i = 0; i < tPolygonLatArr.size() - 1; i++) {
-            for (int j = i + 1; j < tPolygonLatArr.size(); j++) {
+        for (int i = 0; i < mPolygonLatArr.size() - 1; i++) {
+            for (int j = i + 1; j < mPolygonLatArr.size(); j++) {
                 if (mAngleArr.get(i) > mAngleArr.get(j)) {
-                    Collections.swap(tSortPolygonArr, i, j);
+                    Collections.swap(mSortPolygonArr, i, j);
                     Collections.swap(mAngleArr, i, j);
                 }
             }
@@ -358,13 +346,12 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     protected void setLongLength() {
         longDistance = 0;
         indexX = 0;
-        indexY = tSortPolygonArr.size() - 1;
+        indexY = mSortPolygonArr.size() - 1;
 
-        longDistance = MathUtils.getDistance2D(toLatLong(tSortPolygonArr.get(tSortPolygonArr.size() - 1)), toLatLong(tSortPolygonArr.get(0)));
+        longDistance = MathUtils.getDistance2D(toLatLong(mSortPolygonArr.get(mSortPolygonArr.size() - 1)), toLatLong(mSortPolygonArr.get(0)));
 
-        for (int i = 0; i < tSortPolygonArr.size() - 1; i++) {
-            compareDistance = MathUtils.getDistance2D(toLatLong(tSortPolygonArr.get(i)), toLatLong(tSortPolygonArr.get(i + 1)));
-            Log.d("xptmxm", i + "/ CD: " + compareDistance);
+        for (int i = 0; i < mSortPolygonArr.size() - 1; i++) {
+            compareDistance = MathUtils.getDistance2D(toLatLong(mSortPolygonArr.get(i)), toLatLong(mSortPolygonArr.get(i + 1)));
 
             if (longDistance < compareDistance) {
                 longDistance = compareDistance;
@@ -376,47 +363,50 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
     //긴 변의 각으로 bounds 설정
     protected void setBounds() {
-        double bearing = MathUtils.getHeadingFromCoordinates(toLatLong(tSortPolygonArr.get(indexX)), toLatLong(tSortPolygonArr.get(indexY)));
+        mBoundsArr.clear();
+
+        mBearing = MathUtils.getHeadingFromCoordinates(toLatLong(mSortPolygonArr.get(indexX)), toLatLong(mSortPolygonArr.get(indexY))) + 45;
 
         for (int i = 0; i < 4; i++) {
-            LatLong latLong = MathUtils.newCoordFromBearingAndDistance(new LatLong(tCenter.latitude, tCenter.longitude), bearing + 45 + (i * 90), longDistance);
-            boundsMarker.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
-            boundsMarker.get(i).setMap(mNaverMap);
+            LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
+            mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
         }
     }
 
     //폴리곤 Bounds 라인 설정
-    protected void setBoundsLine(){
-        tboundsMarkerArr.clear();
+    protected void setBoundsLine() {
+        mBoundsMarkerArr.clear();
+        mBoundsLatLngArr.clear();
+        tPolyline.setMap(null);
 
-        double tLine = MathUtils.getDistance2D(toLatLong(boundsMarker.get(2).getPosition()), toLatLong(boundsMarker.get(3).getPosition()));
-        double distance = (int) MathUtils.getDistance2D(toLatLong(boundsMarker.get(1).getPosition()), toLatLong(boundsMarker.get(2).getPosition())) / setFlightWidth * 2;
+        double tLine = MathUtils.getDistance2D(toLatLong(mBoundsArr.get(2).getPosition()), toLatLong(mBoundsArr.get(3).getPosition()));
+        double distance = (int) MathUtils.getDistance2D(toLatLong(mBoundsArr.get(1).getPosition()), toLatLong(mBoundsArr.get(2).getPosition())) / setFlightWidth * 2;
 
-        tboundsMarkerArr.add(new Marker(toLatLng(boundsMarker.get(2).getPosition())));
-        tboundsMarkerArr.add(new Marker(toLatLng(boundsMarker.get(3).getPosition())));
+        mBoundsMarkerArr.add(new Marker(toLatLng(mBoundsArr.get(2).getPosition())));
+        mBoundsMarkerArr.add(new Marker(toLatLng(mBoundsArr.get(3).getPosition())));
 
         for (int i = 2; i < distance; i++) {
             if (i % 4 == 0) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(tboundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(tboundsMarkerArr.get(i - 2).getPosition()), toLatLong(tboundsMarkerArr.get(i - 1).getPosition())) - 90, setFlightWidth);
-                tboundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) - 90, setFlightWidth);
+                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
             } else if (i % 4 == 1) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(tboundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(tboundsMarkerArr.get(i - 2).getPosition()), toLatLong(tboundsMarkerArr.get(i - 1).getPosition())) - 90, tLine);
-                tboundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) - 90, tLine);
+                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
             } else if (i % 4 == 2) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(tboundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(tboundsMarkerArr.get(i - 2).getPosition()), toLatLong(tboundsMarkerArr.get(i - 1).getPosition())) + 90, setFlightWidth);
-                tboundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) + 90, setFlightWidth);
+                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
             } else if (i % 4 == 3) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(tboundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(tboundsMarkerArr.get(i - 2).getPosition()), toLatLong(tboundsMarkerArr.get(i - 1).getPosition())) + 90, tLine);
-                tboundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) + 90, tLine);
+                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
             }
         }
 
-        for (int i = 0; i < tboundsMarkerArr.size(); i++) {
-            tboundsLatLngArr.add(tboundsMarkerArr.get(i).getPosition());
+        for (int i = 0; i < mBoundsMarkerArr.size(); i++) {
+            mBoundsLatLngArr.add(mBoundsMarkerArr.get(i).getPosition());
         }
 
-        for (int i = 0; i < tboundsMarkerArr.size(); i++) {
-            tPolyline.setCoords(tboundsLatLngArr);
+        for (int i = 0; i < mBoundsMarkerArr.size(); i++) {
+            tPolyline.setCoords(mBoundsLatLngArr);
 
             tPolyline.setColor(Color.YELLOW);
             tPolyline.setWidth(10);
@@ -424,6 +414,40 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             tPolyline.setMap(mNaverMap);
         }
 
+    }
+
+    //폴리곤 Bounds 회전
+    protected void setBoundsRotation() {
+        final Button btnRotationLeft = (Button) findViewById(R.id.btnRotationLeft);
+        final Button btnRotationRight = (Button) findViewById(R.id.btnRotationRight);
+
+        btnRotationLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBoundsArr.clear();
+                mBearing -= 30;
+
+                for (int i = 0; i < 4; i++) {
+                    LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
+                    mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                }
+                setBoundsLine();
+            }
+        });
+
+        btnRotationRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBoundsArr.clear();
+                mBearing += 30;
+
+                for (int i = 0; i < 4; i++) {
+                    LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
+                    mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                }
+                setBoundsLine();
+            }
+        });
     }
 
 
@@ -702,8 +726,6 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         markerCustom(mDroneMarker);
 
         checkGuidedMode();
-
-        Log.d("mylog", "위도: " + droneGpsPosition.getLatitude() + ", 경도: " + droneGpsPosition.getLongitude());
     }
 
     //비행 경로 그리기
@@ -747,36 +769,39 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
                 mDronePolyline.setMap(null);
                 mTargetMarker.setMap(null);
 
+                for (int i = 0; i < mMissionMarkerArr.size(); i++) {
+                    mMissionMarkerArr.get(i).setMap(null);
+                }
+
+                mMissionMarkerArr.clear();
+                mMissionLatLngArr.clear();
                 mMarkerA.setMap(null);
                 mMarkerB.setMap(null);
                 mABolyline.setMap(null);
                 mCheck = 0;
 
-                mPolygon.setMap(null);
                 mMission.clear();
 
-                for (int i = 0; i < mABMarkerArr.size(); i++) {
-                    mABMarkerArr.get(i).setMap(null);
+                for (int i = 0; i < mPolygonMarkerArr.size(); i++) {
+                    mPolygonMarkerArr.get(i).setMap(null);
+
                 }
-                for (int i = 0; i < tPolygonMarkerArr.size(); i++) {
-                    tPolygonMarkerArr.get(i).setMap(null);
-                    tPolygonLatArr.clear();
+                for (int i = 0; i < mBoundsMarkerArr.size(); i++) {
+                    mBoundsMarkerArr.get(i).setMap(null);
                 }
 
-                mABLatLngArr.clear();
-                mABMarkerArr.clear();
-
-                tPolygon.setMap(null);
-                tMarker.setMap(null);
+                mPolygon.setMap(null);
+                tPolyline.setMap(null);
                 mAngleArr.clear();
 
-                tMissionLatLngArr.clear();
-                tPolygonLatArr.clear();
-                tPolygonMarkerArr.clear();
-                tSortPolygonArr.clear();
+                mPolygonMarkerArr.clear();
+                mPolygonLatArr.clear();
+                mSortPolygonArr.clear();
 
-                tboundsMarkerArr.clear();
-                tPolyline.setMap(null);
+                mBoundsMarkerArr.clear();
+                mBoundsLatLngArr.clear();
+
+                mBoundsArr.clear();
             }
         });
     }
@@ -805,10 +830,6 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             marker.setAnchor(new PointF(0.5F, 0.5F));
             marker.setIcon(OverlayImage.fromResource(R.drawable.icon_b));
             marker.setMap(mNaverMap);
-        } else if (marker == tMarker) {
-            marker.setWidth(30);
-            marker.setHeight(30);
-            marker.setMap(mNaverMap);
         } else {
             marker.setWidth(60);
             marker.setHeight(60);
@@ -817,13 +838,13 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     }
 
     //LatLong 코드 변경
-    protected LatLong toLatLong(LatLng latLong){
+    protected LatLong toLatLong(LatLng latLong) {
         LatLong tl = new LatLong(latLong.latitude, latLong.longitude);
         return tl;
     }
 
     //LatLng 코드 변경
-    protected LatLng toLatLng(LatLng latLng){
+    protected LatLng toLatLng(LatLng latLng) {
         LatLng tl = new LatLng(latLng.latitude, latLng.longitude);
         return tl;
     }
@@ -903,7 +924,9 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
                 btnAtoB = (Button) findViewById(R.id.btnAtoB),
                 btnPolygon = (Button) findViewById(R.id.btnPolygon),
                 btnCancel = (Button) findViewById(R.id.btnCancel),
-                btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic);
+                btnAtoBStatic = (Button) findViewById(R.id.btnAtoBStatic),
+                btnRotationLeft = (Button) findViewById(R.id.btnRotationLeft),
+                btnRotationRight = (Button) findViewById(R.id.btnRotationRight);
 
         btnMission.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -945,6 +968,9 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
                 btnAtoBStatic.setVisibility(View.INVISIBLE);
 
+                btnRotationLeft.setVisibility(View.VISIBLE);
+                btnRotationRight.setVisibility(View.VISIBLE);
+
                 setPolygonMarker();
             }
         });
@@ -958,6 +984,9 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
                 btnCancel.setVisibility(View.INVISIBLE);
 
                 btnAtoBStatic.setVisibility(View.INVISIBLE);
+
+                btnRotationLeft.setVisibility(View.INVISIBLE);
+                btnRotationRight.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -1093,7 +1122,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             @Override
             public void onClick(View v) {
                 mCheck = 2;
-                mABMarkerArr.add(new Marker(toLatLng(mMarkerA.getPosition())));
+                mMissionMarkerArr.add(new Marker(toLatLng(mMarkerA.getPosition())));
                 updateBtnMission(mCheck);
             }
         });
@@ -1115,7 +1144,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             @Override
             public void onClick(View v) {
                 mCheck = 3;
-                mABMarkerArr.add(new Marker(toLatLng(mMarkerB.getPosition())));
+                mMissionMarkerArr.add(new Marker(toLatLng(mMarkerB.getPosition())));
                 setDistance();
                 updateBtnMission(mCheck);
             }
@@ -1124,7 +1153,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
     //AB 지점 폴리라인
     protected void setDistance() {
-        double tLine = MathUtils.getDistance2D(toLatLong(mABMarkerArr.get(0).getPosition()), toLatLong(mABMarkerArr.get(1).getPosition()));
+        double tLine = MathUtils.getDistance2D(toLatLong(mMissionMarkerArr.get(0).getPosition()), toLatLong(mMissionMarkerArr.get(1).getPosition()));
         double distance = (int) (setDistanceTo / setFlightWidth * 2);
 
         if (distance % 4 == 1 || distance % 4 == 2) {
@@ -1137,26 +1166,26 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
 
         for (int i = 2; i < distance; i++) {
             if (i % 4 == 0) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mABMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mABMarkerArr.get(i - 2).getPosition()), toLatLong(mABMarkerArr.get(i - 1).getPosition())) - 90, setFlightWidth);
-                mABMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mMissionMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mMissionMarkerArr.get(i - 2).getPosition()), toLatLong(mMissionMarkerArr.get(i - 1).getPosition())) - 90, setFlightWidth);
+                mMissionMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
             } else if (i % 4 == 1) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mABMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mABMarkerArr.get(i - 2).getPosition()), toLatLong(mABMarkerArr.get(i - 1).getPosition())) - 90, tLine);
-                mABMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mMissionMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mMissionMarkerArr.get(i - 2).getPosition()), toLatLong(mMissionMarkerArr.get(i - 1).getPosition())) - 90, tLine);
+                mMissionMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
             } else if (i % 4 == 2) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mABMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mABMarkerArr.get(i - 2).getPosition()), toLatLong(mABMarkerArr.get(i - 1).getPosition())) + 90, setFlightWidth);
-                mABMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mMissionMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mMissionMarkerArr.get(i - 2).getPosition()), toLatLong(mMissionMarkerArr.get(i - 1).getPosition())) + 90, setFlightWidth);
+                mMissionMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
             } else if (i % 4 == 3) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mABMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mABMarkerArr.get(i - 2).getPosition()), toLatLong(mABMarkerArr.get(i - 1).getPosition())) + 90, tLine);
-                mABMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mMissionMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mMissionMarkerArr.get(i - 2).getPosition()), toLatLong(mMissionMarkerArr.get(i - 1).getPosition())) + 90, tLine);
+                mMissionMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
             }
         }
 
-        for (int i = 0; i < mABMarkerArr.size(); i++) {
-            mABLatLngArr.add(mABMarkerArr.get(i).getPosition());
+        for (int i = 0; i < mMissionMarkerArr.size(); i++) {
+            mMissionLatLngArr.add(mMissionMarkerArr.get(i).getPosition());
         }
 
-        for (int i = 0; i < mABMarkerArr.size(); i++) {
-            mABolyline.setCoords(mABLatLngArr);
+        for (int i = 0; i < mMissionMarkerArr.size(); i++) {
+            mABolyline.setCoords(mMissionLatLngArr);
 
             mABolyline.setColor(Color.YELLOW);
             mABolyline.setWidth(10);
@@ -1173,8 +1202,8 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         btnAtoBStatic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (int i = 0; i < mABLatLngArr.size(); i++) {
-                    mWaypoint.setCoordinate(new LatLongAlt(mABLatLngArr.get(i).latitude, mABLatLngArr.get(i).longitude, droneAltitude.getAltitude()));
+                for (int i = 0; i < mMissionLatLngArr.size(); i++) {
+                    mWaypoint.setCoordinate(new LatLongAlt(mMissionLatLngArr.get(i).latitude, mMissionLatLngArr.get(i).longitude, droneAltitude.getAltitude()));
                     mWaypoint.setDelay(1);
                     mMission.addMissionItem(i, mWaypoint);
 
