@@ -576,22 +576,34 @@
         </TableRow>
     </TableLayout>
 
-    <TableLayout
-        android:id="@+id/recyclerViewTableLayout"
-        android:layout_width="250dp"
-        android:layout_height="130dp"
-        app:layout_constraintBottom_toBottomOf="@+id/map"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.12">
+<!--    <TableLayout-->
+<!--        android:id="@+id/recyclerViewTableLayout"-->
+<!--        android:layout_width="250dp"-->
+<!--        android:layout_height="130dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/map"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintHorizontal_bias="0.0"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintVertical_bias="0.12">-->
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical" />
-    </TableLayout>
+<!--        <android.support.v7.widget.RecyclerView-->
+<!--            android:id="@+id/recyclerView"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:scrollbars="vertical"-->
+<!--            android:visibility="invisible" />-->
+<!--    </TableLayout>-->
+
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="300dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="48dp"
+        android:visibility="invisible"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="16dp">
+
+    </WebView>
 
 </android.support.constraint.ConstraintLayout>

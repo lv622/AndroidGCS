@@ -14,12 +14,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.geometry.LatLngBounds;
@@ -69,9 +69,9 @@ import com.o3dr.services.android.lib.util.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MainActivity extends AppCompatActivity implements DroneListener, TowerListener, LinkListener, OnMapReadyCallback {
 
@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     private double mBearing = 0;
 
     private PolylineOverlay tPolyline = new PolylineOverlay();
+    private ArrayList<Marker> tMarkerArr = new ArrayList<>();
 
     private LatLng mBoundsCenter;
 
@@ -134,6 +135,9 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     private ArrayList<Marker> mBoundsArr = new ArrayList<>();
     private ArrayList<Marker> mBoundsMarkerArr = new ArrayList<>();
     private ArrayList<LatLng> mBoundsLatLngArr = new ArrayList<>();
+
+    private ArrayList<LatLng> mBoundsLeftLatLngArr = new ArrayList<>();
+    private ArrayList<LatLng> mBoundsRightLatLngArr = new ArrayList<>();
 
     Handler mainHandler;
 
@@ -237,11 +241,16 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         updateMapCadastralButton(); //지적도 버튼
         updateCameraMove(); //카메라 버튼
         setOverlayClear(); //전체 오버레이 삭제 버튼
-        setRecyclerView(); //리사이클러뷰
+        //setRecyclerView(); //리사이클러뷰
 
         setMission(); //임무
         setFlightWidth(); //비행폭
         setDistanceAtoB(); //비행거리
+
+        //카메라
+        String videoURL = "http://192.168.0.19:8081";
+        WebView mWebView;
+        mWebView = findViewById(R.id.webView);
     }
 
     @Override
@@ -285,169 +294,6 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
             fm.beginTransaction().add(R.id.map, mapFragment).commit();
         }
         mapFragment.getMapAsync(this);
-    }
-
-
-    //--------------------Polygon Mission--------------------//
-
-    //다각형 폴리곤 설정
-    public void setPolygonMarker() {
-        mNaverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(@NonNull @NotNull PointF pointF, @NonNull @NotNull LatLng latLng) {
-                mPolygonMarkerArr.add(new Marker(toLatLng(latLng)));
-                mPolygonLatArr.add(toLatLng(latLng));
-
-                for (int i = 0; i < mPolygonMarkerArr.size(); i++) {
-                    markerCustom(mPolygonMarkerArr.get(i));
-                    mPolygonMarkerArr.get(i).setMap(mNaverMap);
-                }
-
-                LatLngBounds bounds = new LatLngBounds.Builder().include(mPolygonLatArr).build();
-
-                mBoundsCenter = bounds.getCenter();
-
-                if (mPolygonLatArr.size() > 2) {
-                    sortingPolygon();
-                    setLongLength();
-                    setBounds();
-                    setBoundsRotation();
-                    setBoundsLine();
-
-                    mPolygon.setCoords(mSortPolygonArr);
-                    mPolygon.setColor(0x9fffffff);
-                    mPolygon.setMap(mNaverMap);
-                }
-            }
-        });
-    }
-
-    //폴리곤 정렬
-    protected void sortingPolygon() {
-        mAngleArr.clear();
-        mSortPolygonArr.clear();
-
-        for (int i = 0; i < mPolygonLatArr.size(); i++) {
-            mAngleArr.add(i, MathUtils.getHeadingFromCoordinates(toLatLong(mPolygonLatArr.get(i)), toLatLong(mBoundsCenter)));
-            mSortPolygonArr.add(i, mPolygonLatArr.get(i));
-        }
-
-        for (int i = 0; i < mPolygonLatArr.size() - 1; i++) {
-            for (int j = i + 1; j < mPolygonLatArr.size(); j++) {
-                if (mAngleArr.get(i) > mAngleArr.get(j)) {
-                    Collections.swap(mSortPolygonArr, i, j);
-                    Collections.swap(mAngleArr, i, j);
-                }
-            }
-        }
-    }
-
-    //가장 긴 변 길이
-    protected void setLongLength() {
-        longDistance = 0;
-        indexX = 0;
-        indexY = mSortPolygonArr.size() - 1;
-
-        longDistance = MathUtils.getDistance2D(toLatLong(mSortPolygonArr.get(mSortPolygonArr.size() - 1)), toLatLong(mSortPolygonArr.get(0)));
-
-        for (int i = 0; i < mSortPolygonArr.size() - 1; i++) {
-            compareDistance = MathUtils.getDistance2D(toLatLong(mSortPolygonArr.get(i)), toLatLong(mSortPolygonArr.get(i + 1)));
-
-            if (longDistance < compareDistance) {
-                longDistance = compareDistance;
-                indexX = i;
-                indexY = i + 1;
-            }
-        }
-    }
-
-    //긴 변의 각으로 bounds 설정
-    protected void setBounds() {
-        mBoundsArr.clear();
-
-        mBearing = MathUtils.getHeadingFromCoordinates(toLatLong(mSortPolygonArr.get(indexX)), toLatLong(mSortPolygonArr.get(indexY))) + 45;
-
-        for (int i = 0; i < 4; i++) {
-            LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
-            mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
-        }
-    }
-
-    //폴리곤 Bounds 라인 설정
-    protected void setBoundsLine() {
-        mBoundsMarkerArr.clear();
-        mBoundsLatLngArr.clear();
-        tPolyline.setMap(null);
-
-        double tLine = MathUtils.getDistance2D(toLatLong(mBoundsArr.get(2).getPosition()), toLatLong(mBoundsArr.get(3).getPosition()));
-        double distance = (int) MathUtils.getDistance2D(toLatLong(mBoundsArr.get(1).getPosition()), toLatLong(mBoundsArr.get(2).getPosition())) / setFlightWidth * 2;
-
-        mBoundsMarkerArr.add(new Marker(toLatLng(mBoundsArr.get(2).getPosition())));
-        mBoundsMarkerArr.add(new Marker(toLatLng(mBoundsArr.get(3).getPosition())));
-
-        for (int i = 2; i < distance; i++) {
-            if (i % 4 == 0) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) - 90, setFlightWidth);
-                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
-            } else if (i % 4 == 1) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) - 90, tLine);
-                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
-            } else if (i % 4 == 2) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) + 90, setFlightWidth);
-                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
-            } else if (i % 4 == 3) {
-                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) + 90, tLine);
-                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
-            }
-        }
-
-        for (int i = 0; i < mBoundsMarkerArr.size(); i++) {
-            mBoundsLatLngArr.add(mBoundsMarkerArr.get(i).getPosition());
-        }
-
-        for (int i = 0; i < mBoundsMarkerArr.size(); i++) {
-            tPolyline.setCoords(mBoundsLatLngArr);
-
-            tPolyline.setColor(Color.YELLOW);
-            tPolyline.setWidth(10);
-            tPolyline.setCapType(PolylineOverlay.LineCap.Round);
-            tPolyline.setMap(mNaverMap);
-        }
-
-    }
-
-    //폴리곤 Bounds 회전
-    protected void setBoundsRotation() {
-        final Button btnRotationLeft = (Button) findViewById(R.id.btnRotationLeft);
-        final Button btnRotationRight = (Button) findViewById(R.id.btnRotationRight);
-
-        btnRotationLeft.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBoundsArr.clear();
-                mBearing -= 30;
-
-                for (int i = 0; i < 4; i++) {
-                    LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
-                    mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
-                }
-                setBoundsLine();
-            }
-        });
-
-        btnRotationRight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBoundsArr.clear();
-                mBearing += 30;
-
-                for (int i = 0; i < 4; i++) {
-                    LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
-                    mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
-                }
-                setBoundsLine();
-            }
-        });
     }
 
 
@@ -744,19 +590,19 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         mDronePolyline.setMap(mNaverMap);
     }
 
-    //리사이클러뷰 추가
-    protected void setRecyclerView() {
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        SimpleTextAdapter adapter = new SimpleTextAdapter(list);
-        recyclerView.setAdapter(adapter);
-
-        recyclerView.smoothScrollToPosition(adapter.getItemCount());
-
-        //layoutManager.setReverseLayout(true); //역순 출력
-        //layoutManager.setStackFromEnd(true);
-    }
+//    //리사이클러뷰 추가
+//    protected void setRecyclerView() {
+//        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+//        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+//
+//        SimpleTextAdapter adapter = new SimpleTextAdapter(list);
+//        recyclerView.setAdapter(adapter);
+//
+//        recyclerView.smoothScrollToPosition(adapter.getItemCount());
+//
+//        //layoutManager.setReverseLayout(true); //역순 출력
+//        //layoutManager.setStackFromEnd(true);
+//    }
 
     //전체 오버레이 삭제 //수정 필요
     protected void setOverlayClear() {
@@ -788,6 +634,10 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
                 }
                 for (int i = 0; i < mBoundsMarkerArr.size(); i++) {
                     mBoundsMarkerArr.get(i).setMap(null);
+                }
+
+                for (int i = 0; i < mMissionMarkerArr.size(); i++) {
+                    mMissionMarkerArr.get(i).setMap(null);
                 }
 
                 mPolygon.setMap(null);
@@ -1282,6 +1132,249 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     }
 
 
+    //--------------------Polygon Mission--------------------//
+
+    //다각형 폴리곤 설정
+    public void setPolygonMarker() {
+        mNaverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(@NonNull @NotNull PointF pointF, @NonNull @NotNull LatLng latLng) {
+                mPolygonMarkerArr.add(new Marker(toLatLng(latLng)));
+                mPolygonLatArr.add(toLatLng(latLng));
+
+                for (int i = 0; i < mPolygonMarkerArr.size(); i++) {
+                    markerCustom(mPolygonMarkerArr.get(i));
+                    mPolygonMarkerArr.get(i).setMap(mNaverMap);
+                }
+
+                LatLngBounds bounds = new LatLngBounds.Builder().include(mPolygonLatArr).build();
+
+                mBoundsCenter = bounds.getCenter();
+
+                if (mPolygonLatArr.size() > 2) {
+                    sortingPolygon();
+                    setLongLength();
+                    setBounds();
+                    setBoundsRotation();
+                    test_line(); //setBoundsLine();
+                    test_point();
+
+                    mPolygon.setCoords(mSortPolygonArr);
+                    mPolygon.setColor(0x9fffffff);
+                    mPolygon.setMap(mNaverMap);
+                }
+            }
+        });
+    }
+
+    //폴리곤 정렬
+    protected void sortingPolygon() {
+        mAngleArr.clear();
+        mSortPolygonArr.clear();
+
+        for (int i = 0; i < mPolygonLatArr.size(); i++) {
+            mAngleArr.add(i, MathUtils.getHeadingFromCoordinates(toLatLong(mPolygonLatArr.get(i)), toLatLong(mBoundsCenter)));
+            mSortPolygonArr.add(i, mPolygonLatArr.get(i));
+        }
+
+        for (int i = 0; i < mPolygonLatArr.size() - 1; i++) {
+            for (int j = i + 1; j < mPolygonLatArr.size(); j++) {
+                if (mAngleArr.get(i) > mAngleArr.get(j)) {
+                    Collections.swap(mSortPolygonArr, i, j);
+                    Collections.swap(mAngleArr, i, j);
+                }
+            }
+        }
+    }
+
+    //가장 긴 변 길이
+    protected void setLongLength() {
+        longDistance = 0;
+        indexX = 0;
+        indexY = mSortPolygonArr.size() - 1;
+
+        longDistance = MathUtils.getDistance2D(toLatLong(mSortPolygonArr.get(mSortPolygonArr.size() - 1)), toLatLong(mSortPolygonArr.get(0)));
+
+        for (int i = 0; i < mSortPolygonArr.size() - 1; i++) {
+            compareDistance = MathUtils.getDistance2D(toLatLong(mSortPolygonArr.get(i)), toLatLong(mSortPolygonArr.get(i + 1)));
+
+            if (longDistance < compareDistance) {
+                longDistance = compareDistance;
+                indexX = i;
+                indexY = i + 1;
+            }
+        }
+    }
+
+    //긴 변의 각으로 bounds 설정
+    protected void setBounds() {
+        mBoundsArr.clear();
+
+        mBearing = MathUtils.getHeadingFromCoordinates(toLatLong(mSortPolygonArr.get(indexX)), toLatLong(mSortPolygonArr.get(indexY))) + 45;
+
+        for (int i = 0; i < 4; i++) {
+            LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
+            mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+        }
+    }
+
+    //폴리곤 Bounds 라인 설정
+    protected void setBoundsLine() {
+        mBoundsMarkerArr.clear();
+        mBoundsLatLngArr.clear();
+        tPolyline.setMap(null);
+
+        double tLine = MathUtils.getDistance2D(toLatLong(mBoundsArr.get(2).getPosition()), toLatLong(mBoundsArr.get(3).getPosition()));
+        double distance = (int) MathUtils.getDistance2D(toLatLong(mBoundsArr.get(1).getPosition()), toLatLong(mBoundsArr.get(2).getPosition())) / setFlightWidth * 2;
+
+        mBoundsMarkerArr.add(new Marker(toLatLng(mBoundsArr.get(2).getPosition())));
+        mBoundsMarkerArr.add(new Marker(toLatLng(mBoundsArr.get(3).getPosition())));
+
+        for (int i = 2; i < distance; i++) {
+            if (i % 4 == 0) {
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) - 90, setFlightWidth);
+                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+            } else if (i % 4 == 1) {
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) - 90, tLine);
+                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+            } else if (i % 4 == 2) {
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) + 90, setFlightWidth);
+                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+            } else if (i % 4 == 3) {
+                LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsMarkerArr.get(i - 1).getPosition()), MathUtils.getHeadingFromCoordinates(toLatLong(mBoundsMarkerArr.get(i - 2).getPosition()), toLatLong(mBoundsMarkerArr.get(i - 1).getPosition())) + 90, tLine);
+                mBoundsMarkerArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+            }
+        }
+
+        for (int i = 0; i < mBoundsMarkerArr.size(); i++) {
+            mBoundsLatLngArr.add(mBoundsMarkerArr.get(i).getPosition());
+        }
+
+        for (int i = 0; i < mBoundsMarkerArr.size(); i++) {
+            tPolyline.setCoords(mBoundsLatLngArr);
+
+            tPolyline.setColor(Color.YELLOW);
+            tPolyline.setWidth(10);
+            tPolyline.setCapType(PolylineOverlay.LineCap.Round);
+            tPolyline.setMap(mNaverMap);
+        }
+
+    }
+
+    //폴리곤 bounds 왼, 오 따로 설정
+    protected void test_line() {
+        mBoundsLeftLatLngArr.clear();
+        mBoundsRightLatLngArr.clear();
+        tPolyline.setMap(null);
+
+        double distance = (int) MathUtils.getDistance2D(toLatLong(mBoundsArr.get(1).getPosition()), toLatLong(mBoundsArr.get(2).getPosition())) / setFlightWidth;
+
+        mBoundsLeftLatLngArr.add(toLatLng(mBoundsArr.get(2).getPosition()));
+        mBoundsRightLatLngArr.add(toLatLng(mBoundsArr.get(3).getPosition()));
+
+        for (int i = 1; i < distance; i++) {
+            LatLong LeftLatLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsLeftLatLngArr.get(0)), +180, setFlightWidth * i);
+            mBoundsLeftLatLngArr.add(new LatLng(LeftLatLong.getLatitude(), LeftLatLong.getLongitude()));
+            LatLong RightLatLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsRightLatLngArr.get(0)), +180, setFlightWidth * i);
+            mBoundsRightLatLngArr.add(new LatLng(RightLatLong.getLatitude(), RightLatLong.getLongitude()));
+        }
+
+        for (int i = 1; i < distance; i++) {
+            if (i % 2== 1){
+                mBoundsLatLngArr.add(mBoundsRightLatLngArr.get(i));
+                mBoundsLatLngArr.add(mBoundsLeftLatLngArr.get(i));
+            } else {
+                mBoundsLatLngArr.add(mBoundsLeftLatLngArr.get(i));
+                mBoundsLatLngArr.add(mBoundsRightLatLngArr.get(i));
+            }
+        }
+
+        for (int i = 0; i < distance; i++) {
+            tPolyline.setCoords(mBoundsLatLngArr);
+
+            tPolyline.setColor(Color.YELLOW);
+            tPolyline.setWidth(10);
+            tPolyline.setCapType(PolylineOverlay.LineCap.Round);
+            tPolyline.setMap(mNaverMap);
+        }
+    }
+
+    //교점 구해서 array에 추가
+    protected void test_point() {
+        mMissionMarkerArr.clear();
+        mMissionLatLngArr.clear();
+
+
+        for (int i = 0; i < mSortPolygonArr.size() - 1; i++) {
+            for (int j = 0; j < mBoundsLeftLatLngArr.size(); j++) {
+                LatLng latLng = IntersectionPoint(toLatLong(mSortPolygonArr.get(i)), toLatLong(mSortPolygonArr.get(i+1)), toLatLong(mBoundsLeftLatLngArr.get(j)), toLatLong(mBoundsRightLatLngArr.get(j)));
+                mMissionLatLngArr.add(toLatLng(latLng));
+                mMissionMarkerArr.add(new Marker(toLatLng(latLng)));
+            }
+        }
+
+        for (int i = 0; i < mMissionMarkerArr.size(); i++) {
+            markerCustom(mMissionMarkerArr.get(i));
+            mMissionMarkerArr.get(i).setMap(mNaverMap);
+        }
+    }
+
+    //교점 구하는 공식
+    protected LatLng IntersectionPoint(LatLong p1, LatLong p2, LatLong p3, LatLong p4) {
+        double x1 = p1.getLatitude(); double y1 = p1.getLongitude();
+        double x2 = p2.getLatitude(); double y2 = p2.getLongitude();
+        double x3 = p3.getLatitude(); double y3 = p3.getLongitude();
+        double x4 = p4.getLatitude(); double y4 = p4.getLongitude();
+
+        double px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4));
+        double py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4));
+        double p = ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+
+        if (p != 0) {
+            px = px / p;
+            py = py / p;
+        }
+
+        LatLng point = new LatLng(px, py);
+
+        return point;
+    }
+
+    //폴리곤 Bounds 회전
+    protected void setBoundsRotation() {
+        final Button btnRotationLeft = (Button) findViewById(R.id.btnRotationLeft);
+        final Button btnRotationRight = (Button) findViewById(R.id.btnRotationRight);
+
+        btnRotationLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBoundsArr.clear();
+                mBearing -= 30;
+
+                for (int i = 0; i < 4; i++) {
+                    LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
+                    mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                }
+                setBoundsLine();
+            }
+        });
+
+        btnRotationRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBoundsArr.clear();
+                mBearing += 30;
+
+                for (int i = 0; i < 4; i++) {
+                    LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
+                    mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
+                }
+                setBoundsLine();
+            }
+        });
+    }
+
+
     //--------------------drone Warning--------------------//
 
     //Arm 경고 메세지
@@ -1556,7 +1649,7 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         Log.d(TAG, message);
 
         list.add(String.format(" ★ " + message + "  "));
-        setRecyclerView();
+        //setRecyclerView();
     }
 
     private void runOnMainThread(Runnable runnable) {
