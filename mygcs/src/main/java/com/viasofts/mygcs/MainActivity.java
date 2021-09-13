@@ -1156,8 +1156,8 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
                     setLongLength();
                     setBounds();
                     setBoundsRotation();
-                    test_line(); //setBoundsLine();
-                    test_point();
+                    setPolygonLRLine(); //setBoundsLine();
+                    setPolygonPoint();
 
                     mPolygon.setCoords(mSortPolygonArr);
                     mPolygon.setColor(0x9fffffff);
@@ -1262,7 +1262,11 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     }
 
     //폴리곤 bounds 왼, 오 따로 설정
-    protected void test_line() {
+    protected void setPolygonLRLine() {
+        mBoundsMarkerArr.clear();
+        mBoundsLatLngArr.clear();
+        tPolyline.setMap(null);
+
         mBoundsLeftLatLngArr.clear();
         mBoundsRightLatLngArr.clear();
         tPolyline.setMap(null);
@@ -1273,14 +1277,14 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         mBoundsRightLatLngArr.add(toLatLng(mBoundsArr.get(3).getPosition()));
 
         for (int i = 1; i < distance; i++) {
-            LatLong LeftLatLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsLeftLatLngArr.get(0)), +180, setFlightWidth * i);
+            LatLong LeftLatLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsLeftLatLngArr.get(0)), mBearing + 45, setFlightWidth * i);
             mBoundsLeftLatLngArr.add(new LatLng(LeftLatLong.getLatitude(), LeftLatLong.getLongitude()));
-            LatLong RightLatLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsRightLatLngArr.get(0)), +180, setFlightWidth * i);
+            LatLong RightLatLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsRightLatLngArr.get(0)), mBearing + 45, setFlightWidth * i);
             mBoundsRightLatLngArr.add(new LatLng(RightLatLong.getLatitude(), RightLatLong.getLongitude()));
         }
 
         for (int i = 1; i < distance; i++) {
-            if (i % 2== 1){
+            if (i % 2 == 1) {
                 mBoundsLatLngArr.add(mBoundsRightLatLngArr.get(i));
                 mBoundsLatLngArr.add(mBoundsLeftLatLngArr.get(i));
             } else {
@@ -1300,17 +1304,21 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     }
 
     //교점 구해서 array에 추가
-    protected void test_point() {
+    protected void setPolygonPoint() {
+        for (int i = 0; i < mMissionMarkerArr.size(); i++) {
+            mMissionMarkerArr.get(i).setMap(null);
+        }
         mMissionMarkerArr.clear();
         mMissionLatLngArr.clear();
 
-
         for (int i = 0; i < mSortPolygonArr.size() - 1; i++) {
             for (int j = 0; j < mBoundsLeftLatLngArr.size(); j++) {
-                LatLng latLng = IntersectionPoint(toLatLong(mSortPolygonArr.get(i)), toLatLong(mSortPolygonArr.get(i+1)), toLatLong(mBoundsLeftLatLngArr.get(j)), toLatLong(mBoundsRightLatLngArr.get(j)));
-                mMissionLatLngArr.add(toLatLng(latLng));
-                mMissionMarkerArr.add(new Marker(toLatLng(latLng)));
+                IntersectionPoint(toLatLong(mSortPolygonArr.get(i)), toLatLong(mSortPolygonArr.get(i + 1)), toLatLong(mBoundsLeftLatLngArr.get(j)), toLatLong(mBoundsRightLatLngArr.get(j)));
             }
+        }
+
+        for (int j = 0; j < mBoundsLeftLatLngArr.size(); j++) {
+            IntersectionPoint(toLatLong(mSortPolygonArr.get(0)), toLatLong(mSortPolygonArr.get(mSortPolygonArr.size() - 1)), toLatLong(mBoundsLeftLatLngArr.get(j)), toLatLong(mBoundsRightLatLngArr.get(j)));
         }
 
         for (int i = 0; i < mMissionMarkerArr.size(); i++) {
@@ -1320,11 +1328,11 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
     }
 
     //교점 구하는 공식
-    protected LatLng IntersectionPoint(LatLong p1, LatLong p2, LatLong p3, LatLong p4) {
-        double x1 = p1.getLatitude(); double y1 = p1.getLongitude();
-        double x2 = p2.getLatitude(); double y2 = p2.getLongitude();
-        double x3 = p3.getLatitude(); double y3 = p3.getLongitude();
-        double x4 = p4.getLatitude(); double y4 = p4.getLongitude();
+    protected void IntersectionPoint(LatLong p1, LatLong p2, LatLong p3, LatLong p4) {
+        double x1 = p1.getLatitude(), y1 = p1.getLongitude();
+        double x2 = p2.getLatitude(), y2 = p2.getLongitude();
+        double x3 = p3.getLatitude(), y3 = p3.getLongitude();
+        double x4 = p4.getLatitude(), y4 = p4.getLongitude();
 
         double px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4));
         double py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4));
@@ -1333,11 +1341,29 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
         if (p != 0) {
             px = px / p;
             py = py / p;
+
+            if (px <= x1 && px >= x2) {
+                if (py >= y1 && py <= y2) {
+                    LatLng point = new LatLng(px, py);
+                    mMissionLatLngArr.add(toLatLng(point));
+                    mMissionMarkerArr.add(new Marker(toLatLng(point)));
+                } else if (py <= y1 && py >= y2) {
+                    LatLng point = new LatLng(px, py);
+                    mMissionLatLngArr.add(toLatLng(point));
+                    mMissionMarkerArr.add(new Marker(toLatLng(point)));
+                }
+            } else if (px >= x1 && px <= x2) {
+                if (py >= y1 && py <= y2) {
+                    LatLng point = new LatLng(px, py);
+                    mMissionLatLngArr.add(toLatLng(point));
+                    mMissionMarkerArr.add(new Marker(toLatLng(point)));
+                } else if (py <= y1 && py >= y2) {
+                    LatLng point = new LatLng(px, py);
+                    mMissionLatLngArr.add(toLatLng(point));
+                    mMissionMarkerArr.add(new Marker(toLatLng(point)));
+                }
+            }
         }
-
-        LatLng point = new LatLng(px, py);
-
-        return point;
     }
 
     //폴리곤 Bounds 회전
@@ -1355,7 +1381,8 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
                     LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
                     mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
                 }
-                setBoundsLine();
+                setPolygonLRLine();
+                setPolygonPoint();
             }
         });
 
@@ -1369,7 +1396,8 @@ public class MainActivity extends AppCompatActivity implements DroneListener, To
                     LatLong latLong = MathUtils.newCoordFromBearingAndDistance(toLatLong(mBoundsCenter), mBearing + (i * 90), longDistance * 1.5);
                     mBoundsArr.add(new Marker(new LatLng(latLong.getLatitude(), latLong.getLongitude())));
                 }
-                setBoundsLine();
+                setPolygonLRLine();
+                setPolygonPoint();
             }
         });
     }
